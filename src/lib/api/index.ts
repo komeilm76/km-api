@@ -169,7 +169,7 @@ const makeApiConfig = <
 };
 const makeResponseShape = <RESPONSE extends IResponseData, KEY_OF_DATA extends string>(
   response: RESPONSE,
-  key: KEY_OF_DATA = 'data' as KEY_OF_DATA,
+  key: KEY_OF_DATA = 'data' as KEY_OF_DATA
 ) => {
   return {
     item: () => {
