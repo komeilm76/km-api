@@ -22,6 +22,10 @@ type IDisableStatus = z.infer<typeof disableStatusSchema>;
 const pathSchema = z.string().startsWith('/');
 type IPath = z.infer<typeof pathSchema>;
 
+// description
+const descriptionSchema = z.string();
+type IDescription = z.infer<typeof descriptionSchema>;
+
 // body
 const bodySchema = z.instanceof(ZodType);
 type IBody = z.infer<typeof bodySchema>;
@@ -35,30 +39,23 @@ type IQuery = z.infer<typeof querySchema>;
 const responseSchema = z.instanceof(ZodType);
 type IResponseData = z.infer<typeof responseSchema>;
 
-// const validatorSchema = z.object({
-//   method: methodSchema,
-//   auth: authStatusSchema,
-//   path: z.string().startsWith('/'),
-//   body: z.instanceof(ZodType),
-//   params: z.instanceof(ZodType),
-//   query: z.instanceof(ZodType),
-//   response: z.instanceof(ZodType),
-// });
 
 type IMakeApiConfigEntry<
   METHOD extends IMethod = IMethod,
   PATH extends IPath = IPath,
   AUTH extends IAuthStatus = IAuthStatus,
   DISABLE extends IDisableStatus = IDisableStatus,
+  DESCRIPTION extends IDescription = IDescription,
   BODY extends IBody = IBody,
   PARAMS extends IParams = IParams,
   QUERY extends IQuery = IQuery,
-  RESPONSE_DATA extends IResponseData = IResponseData
+  RESPONSE_DATA extends IResponseData = IResponseData,
 > = {
   method: METHOD;
   path: PATH;
   auth?: AUTH;
   disable?: DISABLE;
+  description?: DESCRIPTION,
   request: {
     body: BODY;
     params: PARAMS;
@@ -74,6 +71,7 @@ const makeApiConfig = <
   PATH extends IPath,
   AUTH extends IAuthStatus,
   DISABLE extends IDisableStatus,
+  DESCRIPTION extends IDescription,
   BODY extends IBody,
   PARAMS extends IParams,
   QUERY extends IQuery,
@@ -83,14 +81,18 @@ const makeApiConfig = <
     PATH,
     AUTH,
     DISABLE,
+    DESCRIPTION,
     BODY,
     PARAMS,
     QUERY,
     RESPONSE_DATA
-  >
+  >,
+
+
 >(
   entryConfig: CONFIG
 ) => {
+
   const makeBody = <BODY extends z.infer<CONFIG['request']['body']>>(body: BODY) => {
     return body;
   };
@@ -111,7 +113,6 @@ const makeApiConfig = <
   ) => {
     return list;
   };
-
   const makeParamsStringShape = <
     KEY extends z.infer<ReturnType<CONFIG['request']['params']['keyof']>>,
     LIST extends KEY[]
@@ -128,7 +129,6 @@ const makeApiConfig = <
   ) => {
     return orderList.map((item) => `/${params[item]}`).join('');
   };
-
   const makeFullPathShape = <
     KEY extends z.infer<ReturnType<CONFIG['request']['params']['keyof']>>,
     LIST extends KEY[]
@@ -153,6 +153,29 @@ const makeApiConfig = <
     let output = `${entryConfig.path}${makeParamsString(params, list)}`;
     return output as `${CONFIG['path']}${kmType.Advanced.JoinListOfStringInStart<[...LIST], '/:'>}`;
   };
+  const makeExamples = (data: {
+    exampleOfRequestBody?: z.infer<CONFIG['request']['body']>,
+    exampleOfRequestParms?: z.infer<CONFIG['request']['params']>,
+    exampleOfRequestQuery?: z.infer<CONFIG['request']['query']>,
+    exampleOfResponseData?: z.infer<CONFIG['response']['data']>
+  }) => {
+    const examples = {
+      ...data
+    }
+    return {
+      ...entryConfig,
+      examples,
+      makeParamsOrderedList,
+      makeParamsStringShape,
+      makeParamsString,
+      makeFullPathShape,
+      makeFullPath,
+      makeBody,
+      makeResponse,
+      makeQueries,
+      makeParams,
+    }
+  }
 
   return {
     ...entryConfig,
@@ -165,6 +188,8 @@ const makeApiConfig = <
     makeResponse,
     makeQueries,
     makeParams,
+    makeExamples,
+
   };
 };
 const makeResponseShape = <RESPONSE extends IResponseData, KEY_OF_DATA extends string>(
@@ -204,3 +229,5 @@ export default {
   makeResponseShape,
   paginationSchema,
 };
+
+
