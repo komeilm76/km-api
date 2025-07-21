@@ -39,7 +39,6 @@ type IQuery = z.infer<typeof querySchema>;
 const responseSchema = z.instanceof(ZodType);
 type IResponseData = z.infer<typeof responseSchema>;
 
-
 type IMakeApiConfigEntry<
   METHOD extends IMethod = IMethod,
   PATH extends IPath = IPath,
@@ -49,13 +48,13 @@ type IMakeApiConfigEntry<
   BODY extends IBody = IBody,
   PARAMS extends IParams = IParams,
   QUERY extends IQuery = IQuery,
-  RESPONSE_DATA extends IResponseData = IResponseData,
+  RESPONSE_DATA extends IResponseData = IResponseData
 > = {
   method: METHOD;
   path: PATH;
   auth?: AUTH;
   disable?: DISABLE;
-  description?: DESCRIPTION,
+  description?: DESCRIPTION;
   request: {
     body: BODY;
     params: PARAMS;
@@ -86,13 +85,10 @@ const makeApiConfig = <
     PARAMS,
     QUERY,
     RESPONSE_DATA
-  >,
-
-
+  >
 >(
   entryConfig: CONFIG
 ) => {
-
   const makeBody = <BODY extends z.infer<CONFIG['request']['body']>>(body: BODY) => {
     return body;
   };
@@ -154,14 +150,14 @@ const makeApiConfig = <
     return output as `${CONFIG['path']}${kmType.Advanced.JoinListOfStringInStart<[...LIST], '/:'>}`;
   };
   const makeExamples = (data: {
-    exampleOfRequestBody?: z.infer<CONFIG['request']['body']>,
-    exampleOfRequestParms?: z.infer<CONFIG['request']['params']>,
-    exampleOfRequestQuery?: z.infer<CONFIG['request']['query']>,
-    exampleOfResponseData?: z.infer<CONFIG['response']['data']>
+    exampleOfRequestBody?: z.infer<CONFIG['request']['body']>;
+    exampleOfRequestParms?: z.infer<CONFIG['request']['params']>;
+    exampleOfRequestQuery?: z.infer<CONFIG['request']['query']>;
+    exampleOfResponseData?: z.infer<CONFIG['response']['data']>;
   }) => {
     const examples = {
-      ...data
-    }
+      ...data,
+    };
     return {
       ...entryConfig,
       examples,
@@ -174,8 +170,8 @@ const makeApiConfig = <
       makeResponse,
       makeQueries,
       makeParams,
-    }
-  }
+    };
+  };
 
   return {
     ...entryConfig,
@@ -189,7 +185,6 @@ const makeApiConfig = <
     makeQueries,
     makeParams,
     makeExamples,
-
   };
 };
 const makeResponseShape = <RESPONSE extends IResponseData, KEY_OF_DATA extends string>(
@@ -229,5 +224,3 @@ export default {
   makeResponseShape,
   paginationSchema,
 };
-
-
