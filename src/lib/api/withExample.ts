@@ -171,6 +171,29 @@ const makeApiConfig = <
     let output = `${entryConfig.path}${makeParamsString(params, list)}`;
     return output as `${CONFIG['path']}${kmType.Advanced.JoinListOfStringInStart<[...LIST], '/:'>}`;
   };
+  const makeExamples = (data: {
+    exampleOfRequestBody?: z.infer<CONFIG['request']['body']>;
+    exampleOfRequestParms?: z.infer<CONFIG['request']['params']>;
+    exampleOfRequestQuery?: z.infer<CONFIG['request']['query']>;
+    exampleOfResponseData?: z.infer<CONFIG['response']['data']>;
+  }) => {
+    const examples = {
+      ...data,
+    };
+    return {
+      ...entryConfig,
+      examples,
+      makeParamsOrderedList,
+      makeParamsStringShape,
+      makeParamsString,
+      makeFullPathShape,
+      makeFullPath,
+      makeBody,
+      makeResponse,
+      makeQueries,
+      makeParams,
+    };
+  };
 
   return {
     ...entryConfig,
@@ -183,6 +206,7 @@ const makeApiConfig = <
     makeResponse,
     makeQueries,
     makeParams,
+    makeExamples,
   };
 };
 const makeResponseShape = <RESPONSE extends IResponseData, KEY_OF_DATA extends string>(
@@ -218,7 +242,9 @@ const paginationSchema = () => {
 };
 
 export default {
-  makeApiConfig,
-  makeResponseShape,
-  paginationSchema,
+  withExample: {
+    makeApiConfig,
+    makeResponseShape,
+    paginationSchema,
+  },
 };
