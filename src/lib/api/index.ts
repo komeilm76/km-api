@@ -15,15 +15,27 @@ type IMethod = z.infer<typeof methodSchema>;
 
 // response type
 const responseTypeSchema = z.union([
-  z.literal('arraybuffer'),
+  z.literal('array_buffer'),
   z.literal('blob'),
   z.literal('document'),
   z.literal('json'),
   z.literal('text'),
   z.literal('stream'),
-  z.literal('formdata'),
+  z.literal('form_data'),
 ]);
+
+const requestTypeSchema = z.union([
+  z.literal('form_data'),
+  z.literal('url_search_params'),
+  z.literal('json_object'),
+  z.literal('blob'),
+  z.literal('buffer_source'),
+  z.literal('raw_string'),
+  z.literal('readable_stream'),
+]);
+
 type IResponseType = z.infer<typeof responseTypeSchema>;
+type IRequestType = z.infer<typeof requestTypeSchema>;
 
 // auth status
 const authStatusSchema = z.union([z.literal('YES'), z.literal('NO')]);
@@ -62,6 +74,7 @@ type IMakeApiConfigEntry<
   PATH extends IPath = IPath,
   AUTH extends IAuthStatus = IAuthStatus,
   RESPONSE_TYPE extends IResponseType = IResponseType,
+  REQUEST_TYPE extends IRequestType = IRequestType,
   DISABLE extends IDisableStatus = IDisableStatus,
   DESCRIPTION extends IDescription = IDescription,
   BODY extends IBody = IBody,
@@ -73,6 +86,7 @@ type IMakeApiConfigEntry<
   path: PATH;
   auth?: AUTH;
   responseType?: RESPONSE_TYPE;
+  requestType?: REQUEST_TYPE;
   disable?: DISABLE;
   description?: DESCRIPTION;
   request: {
@@ -90,6 +104,7 @@ const makeApiConfig = <
   PATH extends IPath,
   AUTH extends IAuthStatus,
   RESPONSE_TYPE extends IResponseType,
+  REQUEST_TYPE extends IRequestType,
   DISABLE extends IDisableStatus,
   DESCRIPTION extends IDescription,
   BODY extends IBody,
@@ -101,6 +116,7 @@ const makeApiConfig = <
     PATH,
     AUTH,
     RESPONSE_TYPE,
+    REQUEST_TYPE,
     DISABLE,
     DESCRIPTION,
     BODY,
