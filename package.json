@@ -6,7 +6,7 @@
   "typings": "build/main/index.d.ts",
   "module": "build/module/index.js",
   "repository": {
-    "url": "https://github.com/komeilm76/km-api"
+    "url": "git+https://github.com/komeilm76/km-api.git"
   },
   "license": "MIT",
   "keywords": [
