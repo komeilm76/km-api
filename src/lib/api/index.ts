@@ -65,9 +65,13 @@ type IParams = z.infer<typeof paramsSchema>;
 const querySchema = z.instanceof(ZodObject);
 type IQuery = z.infer<typeof querySchema>;
 
-// response
-const responseSchema = z.instanceof(ZodType);
-type IResponseData = z.infer<typeof responseSchema>;
+// response success
+const responseSuccessSchema = z.instanceof(ZodType);
+type IResponseSuccessData = z.infer<typeof responseSuccessSchema>;
+
+// response error
+const responseErrorSchema = z.instanceof(ZodType);
+type IResponseErrorData = z.infer<typeof responseErrorSchema>;
 
 type IMakeApiConfigEntry<
   METHOD extends IMethod = IMethod,
@@ -80,7 +84,8 @@ type IMakeApiConfigEntry<
   BODY extends IBody = IBody,
   PARAMS extends IParams = IParams,
   QUERY extends IQuery = IQuery,
-  RESPONSE_DATA extends IResponseData = IResponseData
+  RESPONSE_SUCCESS_DATA extends IResponseSuccessData = IResponseSuccessData,
+  RESPONSE_ERROR_DATA extends IResponseErrorData = IResponseErrorData
 > = {
   method: METHOD;
   path: PATH;
@@ -95,7 +100,8 @@ type IMakeApiConfigEntry<
     query: QUERY;
   };
   response: {
-    data: RESPONSE_DATA;
+    success: RESPONSE_SUCCESS_DATA;
+    error: RESPONSE_ERROR_DATA;
   };
 };
 
@@ -110,7 +116,8 @@ const makeApiConfig = <
   BODY extends IBody,
   PARAMS extends IParams,
   QUERY extends IQuery,
-  RESPONSE_DATA extends IResponseData,
+  RESPONSE_SUCCESS_DATA extends IResponseSuccessData,
+  RESPONSE_ERROR_DATA extends IResponseErrorData,
   CONFIG extends IMakeApiConfigEntry<
     METHOD,
     PATH,
@@ -122,7 +129,8 @@ const makeApiConfig = <
     BODY,
     PARAMS,
     QUERY,
-    RESPONSE_DATA
+    RESPONSE_SUCCESS_DATA,
+    RESPONSE_ERROR_DATA
   >
 >(
   entryConfig: CONFIG
@@ -130,7 +138,10 @@ const makeApiConfig = <
   const makeBody = <BODY extends z.infer<CONFIG['request']['body']>>(body: BODY) => {
     return body;
   };
-  const makeResponse = <DATA extends z.infer<CONFIG['response']['data']>>(data: DATA) => {
+  const makeSuccessResponse = <DATA extends z.infer<CONFIG['response']['success']>>(data: DATA) => {
+    return data;
+  };
+  const makeErrorResponse = <DATA extends z.infer<CONFIG['response']['error']>>(data: DATA) => {
     return data;
   };
   const makeQueries = <QUERIES extends z.infer<CONFIG['request']['query']>>(queries: QUERIES) => {
@@ -196,12 +207,16 @@ const makeApiConfig = <
     makeFullPathShape,
     makeFullPath,
     makeBody,
-    makeResponse,
+    makeSuccessResponse,
+    makeErrorResponse,
     makeQueries,
     makeParams,
   };
 };
-const makeResponseShape = <RESPONSE extends IResponseData, KEY_OF_DATA extends string>(
+const makeResponseSuccessShape = <
+  RESPONSE extends IResponseSuccessData,
+  KEY_OF_DATA extends string
+>(
   response: RESPONSE,
   key: KEY_OF_DATA = 'data' as KEY_OF_DATA
 ) => {
@@ -219,7 +234,6 @@ const makeResponseShape = <RESPONSE extends IResponseData, KEY_OF_DATA extends s
       }) as unknown as ZodObject<{
         [key in KEY_OF_DATA]: ZodArray<RESPONSE>;
       }>;
-
       return data.merge(and);
     },
   };
@@ -235,6 +249,6 @@ const paginationSchema = () => {
 
 export default {
   makeApiConfig,
-  makeResponseShape,
+  makeResponseSuccessShape,
   paginationSchema,
 };
