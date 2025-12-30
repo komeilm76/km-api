@@ -7,7 +7,7 @@ A powerful TypeScript package that provides **IntelliSense** and **type-safe val
 > **Version Compatibility Alert:**
 >
 > - **Version 0.0.7 and below**: Works with TypeScript v4 and Zod v3
-> - **Version 0.1.7 and above**: Requires TypeScript v5 and Zod v4
+> - **Version 0.1.0 and above**: Requires TypeScript v5 and Zod v4
 >
 > Please ensure you're using the correct versions based on your project requirements!
 
