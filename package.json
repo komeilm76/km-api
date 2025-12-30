@@ -1,6 +1,6 @@
 {
   "name": "km-api",
-  "version": "0.1.0",
+  "version": "0.0.7",
   "license": "MIT",
   "description": "its package for make api services easy",
   "main": "build/js/index.js",
@@ -26,7 +26,7 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "release-it": "^17.6.0",
+    "release-it": "^19.2.2",
     "typescript": "~5.9.2",
     "prettier": "^2.1.1"
   },
