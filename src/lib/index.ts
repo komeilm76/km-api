@@ -1,6 +1,11 @@
 import api from './api';
 import withExample from './api/withExample';
-export default {
+
+type ExportType = typeof api & typeof withExample;
+
+const exportedApi: ExportType = {
   ...api,
   ...withExample,
 };
+
+export default exportedApi;

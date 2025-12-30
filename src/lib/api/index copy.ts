@@ -1,8 +1,7 @@
 import { z, ZodArray, ZodObject, ZodType } from 'zod/v4';
 import kmType from 'km-type';
 
-// 🌐 HTTP Method Schema
-// Defines all supported HTTP methods for API configuration
+// method
 const methodSchema = z.union([
   z.literal('get'),
   z.literal('post'),
@@ -14,8 +13,7 @@ const methodSchema = z.union([
 ]);
 type IMethod = z.infer<typeof methodSchema>;
 
-// 📦 Response Type Schema
-// Defines how the API response should be parsed
+// response type
 const responseTypeSchema = z.union([
   z.literal('array_buffer'),
   z.literal('blob'),
@@ -26,8 +24,6 @@ const responseTypeSchema = z.union([
   z.literal('form_data'),
 ]);
 
-// 📤 Request Type Schema
-// Defines the format of data being sent to the API
 const requestTypeSchema = z.union([
   z.literal('form_data'),
   z.literal('url_search_params'),
@@ -41,53 +37,42 @@ const requestTypeSchema = z.union([
 type IResponseType = z.infer<typeof responseTypeSchema>;
 type IRequestType = z.infer<typeof requestTypeSchema>;
 
-// 🔐 Authentication Status Schema
-// Indicates whether the endpoint requires authentication
+// auth status
 const authStatusSchema = z.union([z.literal('YES'), z.literal('NO')]);
 type IAuthStatus = z.infer<typeof authStatusSchema>;
 
-// 🚫 Disable Status Schema
-// Allows temporarily disabling endpoints without removing configuration
+// disable status
 const disableStatusSchema = z.union([z.literal('YES'), z.literal('NO')]);
 type IDisableStatus = z.infer<typeof disableStatusSchema>;
 
-// 🛣️ Path Schema
-// Validates that API paths start with forward slash
+// path
 const pathSchema = z.string().startsWith('/');
 type IPath = z.infer<typeof pathSchema>;
 
-// 📝 Description Schema
-// Optional text description for API endpoints
+// description
 const descriptionSchema = z.string();
 type IDescription = z.infer<typeof descriptionSchema>;
 
-// 📋 Body Schema
-// Zod schema for request body validation
+// body
 const bodySchema = z.instanceof(ZodType);
 type IBody = z.infer<typeof bodySchema>;
 
-// 🔢 Params Schema
-// Zod object schema for URL path parameters
+// params
 const paramsSchema = z.instanceof(ZodObject);
 type IParams = z.infer<typeof paramsSchema>;
 
-// ❓ Query Schema
-// Zod object schema for URL query parameters
+// query
 const querySchema = z.instanceof(ZodObject);
 type IQuery = z.infer<typeof querySchema>;
 
-// ✅ Response Success Schema
-// Zod schema for successful API responses
+// response success
 const responseSuccessSchema = z.instanceof(ZodType);
 type IResponseSuccessData = z.infer<typeof responseSuccessSchema>;
 
-// ❌ Response Error Schema
-// Zod schema for error API responses
+// response error
 const responseErrorSchema = z.instanceof(ZodType);
 type IResponseErrorData = z.infer<typeof responseErrorSchema>;
 
-// 🏗️ API Configuration Entry Type
-// Complete type definition for a single API endpoint configuration
 type IMakeApiConfigEntry<
   METHOD extends IMethod = IMethod,
   PATH extends IPath = IPath,
@@ -120,8 +105,6 @@ type IMakeApiConfigEntry<
   };
 };
 
-// 🎯 Main API Configuration Factory
-// Creates a fully typed API endpoint configuration with helper methods
 const makeApiConfig = <
   METHOD extends IMethod,
   PATH extends IPath,
@@ -152,32 +135,21 @@ const makeApiConfig = <
 >(
   entryConfig: CONFIG
 ) => {
-  // 📦 Create type-safe request body
   const makeBody = <BODY extends z.infer<CONFIG['request']['body']>>(body: BODY) => {
     return body;
   };
-
-  // ✅ Create type-safe success response
   const makeSuccessResponse = <DATA extends z.infer<CONFIG['response']['success']>>(data: DATA) => {
     return data;
   };
-
-  // ❌ Create type-safe error response
   const makeErrorResponse = <DATA extends z.infer<CONFIG['response']['error']>>(data: DATA) => {
     return data;
   };
-
-  // ❓ Create type-safe query parameters
   const makeQueries = <QUERIES extends z.infer<CONFIG['request']['query']>>(queries: QUERIES) => {
     return queries;
   };
-
-  // 🔢 Create type-safe URL parameters
   const makeParams = <PARAMS extends z.infer<CONFIG['request']['params']>>(params: PARAMS) => {
     return params;
   };
-
-  // 📋 Create ordered list of parameter keys
   const makeParamsOrderedList = <
     KEY extends z.infer<ReturnType<CONFIG['request']['params']['keyof']>>,
     KEYS extends [...KEY[]]
@@ -186,8 +158,6 @@ const makeApiConfig = <
   ) => {
     return list;
   };
-
-  // 🏷️ Generate parameter shape string (e.g., "/:id/:userId")
   const makeParamsStringShape = <
     KEY extends z.infer<ReturnType<CONFIG['request']['params']['keyof']>>,
     LIST extends KEY[]
@@ -198,16 +168,12 @@ const makeApiConfig = <
       .map((item) => `/:${item}`)
       .join('') as unknown as kmType.Advanced.JoinListOfStringInStart<[...LIST], '/:'>;
   };
-
-  // 🔗 Generate parameter string from values
   const makeParamsString = <PARAMS extends z.infer<CONFIG['request']['params']>>(
     params: PARAMS,
     orderList: (keyof PARAMS)[]
   ) => {
     return orderList.map((item) => `/${params[item]}`).join('');
   };
-
-  // 🛣️ Generate full path shape with parameters
   const makeFullPathShape = <
     KEY extends z.infer<ReturnType<CONFIG['request']['params']['keyof']>>,
     LIST extends KEY[]
@@ -221,8 +187,6 @@ const makeApiConfig = <
     let output = `${entryConfig.path}${paramsShape}`;
     return output as `${CONFIG['path']}${kmType.Advanced.JoinListOfStringInStart<[...LIST], '/:'>}`;
   };
-
-  // 🎯 Generate complete path with parameter values
   const makeFullPath = <
     KEY extends z.infer<ReturnType<CONFIG['request']['params']['keyof']>>,
     LIST extends KEY[],
@@ -249,9 +213,6 @@ const makeApiConfig = <
     makeParams,
   };
 };
-
-// 📊 Response Success Shape Factory
-// Creates response wrappers for single items or lists with custom key names
 const makeResponseSuccessShape = <
   RESPONSE extends IResponseSuccessData,
   KEY_OF_DATA extends string
@@ -260,7 +221,6 @@ const makeResponseSuccessShape = <
   key: KEY_OF_DATA = 'data' as KEY_OF_DATA
 ) => {
   return {
-    // 📦 Single item response wrapper
     item: () => {
       return z.object({
         [key]: response,
@@ -268,7 +228,6 @@ const makeResponseSuccessShape = <
         [key in KEY_OF_DATA]: RESPONSE;
       }>;
     },
-    // 📋 List response wrapper with additional fields
     list: <AND extends ZodObject>(and: AND) => {
       let data = z.object({
         [key]: response,
@@ -280,8 +239,6 @@ const makeResponseSuccessShape = <
   };
 };
 
-// 📄 Pagination Schema Factory
-// Standard pagination object for list responses
 const paginationSchema = () => {
   return z.object({
     currentPage: z.number().min(1),
@@ -290,7 +247,6 @@ const paginationSchema = () => {
   });
 };
 
-// 🎁 Export all utilities
 export default {
   makeApiConfig,
   makeResponseSuccessShape,
