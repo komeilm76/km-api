@@ -1,11 +1,9 @@
 import api from './api';
-import withExample from './api/withExample';
 
-type ExportType = typeof api & typeof withExample;
+type ExportType = typeof api;
 
 const exportedApi: ExportType = {
   ...api,
-  ...withExample,
 };
 
 export default exportedApi;
