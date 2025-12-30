@@ -1,6 +1,6 @@
 {
   "name": "km-api",
-  "version": "0.0.0",
+  "version": "0.0.7",
   "license": "MIT",
   "description": "its package for make api services easy",
   "main": "build/js/index.js",
@@ -21,7 +21,6 @@
     "build:types": "tsc",
     "build:tsup": "bun run build:types && tsup",
     "build": "bun run build:types && bun run build:tsup",
-    "prepublishOnly": "npm run build",
     "publish-directly": "npm publish --access public",
     "auto-release": "npm run fix:prettier && npm run build && release-it"
   },
