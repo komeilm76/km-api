@@ -6,6 +6,7 @@ export default kmApi;
 const schema = kmApi.makeApiConfig({
   path: `/origin`,
   method: 'get',
+  tags: ['#auth', '#test'],
   auth: 'YES',
   disable: 'NO',
   request: {

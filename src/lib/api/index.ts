@@ -56,6 +56,11 @@ type IDisableStatus = z.infer<typeof disableStatusSchema>;
 const pathSchema = z.string().startsWith('/');
 type IPath = z.infer<typeof pathSchema>;
 
+// 🛣️ Tags Schema
+// Validates that API tags
+const tagsSchema = z.string().startsWith('#').array();
+type ITags = z.infer<typeof tagsSchema>;
+
 // 📝 Description Schema
 // Optional text description for API endpoints
 const descriptionSchema = z.string();
@@ -91,6 +96,7 @@ type IResponseErrorData = z.infer<typeof responseErrorSchema>;
 type IMakeApiConfigEntry<
   METHOD extends IMethod = IMethod,
   PATH extends IPath = IPath,
+  TAGS extends ITags = ITags,
   AUTH extends IAuthStatus = IAuthStatus,
   RESPONSE_TYPE extends IResponseType = IResponseType,
   REQUEST_TYPE extends IRequestType = IRequestType,
@@ -104,6 +110,7 @@ type IMakeApiConfigEntry<
 > = {
   method: METHOD;
   path: PATH;
+  tags?: [...TAGS];
   auth?: AUTH;
   responseType?: RESPONSE_TYPE;
   requestType?: REQUEST_TYPE;
@@ -125,6 +132,7 @@ type IMakeApiConfigEntry<
 const makeApiConfig = <
   METHOD extends IMethod,
   PATH extends IPath,
+  TAGS extends ITags,
   AUTH extends IAuthStatus,
   RESPONSE_TYPE extends IResponseType,
   REQUEST_TYPE extends IRequestType,
@@ -138,6 +146,7 @@ const makeApiConfig = <
   CONFIG extends IMakeApiConfigEntry<
     METHOD,
     PATH,
+    TAGS,
     AUTH,
     RESPONSE_TYPE,
     REQUEST_TYPE,
