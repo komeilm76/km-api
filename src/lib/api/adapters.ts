@@ -13,8 +13,7 @@
  * - Fetch API (native browser fetch)
  */
 
-import type { IRequestContentType, IResponseContentType } from "./schemas";
-
+import type { IRequestContentType, IResponseContentType } from './schemas';
 
 // ==========================================
 // AXIOS ADAPTER TYPES
