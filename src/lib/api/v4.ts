@@ -1,146 +1,61 @@
-import { z, ZodArray, ZodObject, ZodType } from 'zod/v4';
+import { z, ZodArray, ZodObject, ZodType, type ZodRawShape } from 'zod/v4';
 import kmType from 'km-type';
-
-// 🌐 HTTP Method Schema
-// Defines all supported HTTP methods for API configuration
-const methodSchema = z.union([
-  z.literal('get'),
-  z.literal('post'),
-  z.literal('put'),
-  z.literal('delete'),
-  z.literal('head'),
-  z.literal('options'),
-  z.literal('patch'),
-]);
-type IMethod = z.infer<typeof methodSchema>;
-
-// 📦 Response Type Schema
-// Defines how the API response should be parsed
-const responseTypeSchema = z.union([
-  z.literal('array_buffer'),
-  z.literal('blob'),
-  z.literal('document'),
-  z.literal('json'),
-  z.literal('text'),
-  z.literal('stream'),
-  z.literal('form_data'),
-]);
-
-// 📤 Request Type Schema
-// Defines the format of data being sent to the API
-const requestTypeSchema = z.union([
-  z.literal('form_data'),
-  z.literal('url_search_params'),
-  z.literal('json_object'),
-  z.literal('blob'),
-  z.literal('buffer_source'),
-  z.literal('raw_string'),
-  z.literal('readable_stream'),
-]);
-
-type IResponseType = z.infer<typeof responseTypeSchema>;
-type IRequestType = z.infer<typeof requestTypeSchema>;
-
-// 🔐 Authentication Status Schema
-// Indicates whether the endpoint requires authentication
-const authStatusSchema = z.union([z.literal('YES'), z.literal('NO')]);
-type IAuthStatus = z.infer<typeof authStatusSchema>;
-
-// 🚫 Disable Status Schema
-// Allows temporarily disabling endpoints without removing configuration
-const disableStatusSchema = z.union([z.literal('YES'), z.literal('NO')]);
-type IDisableStatus = z.infer<typeof disableStatusSchema>;
-
-// 🛣️ Path Schema
-// Validates that API paths start with forward slash
-const pathSchema = z.string().startsWith('/');
-type IPath = z.infer<typeof pathSchema>;
-
-// 🛣️ Tags Schema
-// Validates that API tags
-const tagsSchema = z.string().startsWith('#').array();
-type ITags = z.infer<typeof tagsSchema>;
-
-// 📝 Description Schema
-// Optional text description for API endpoints
-const descriptionSchema = z.string();
-type IDescription = z.infer<typeof descriptionSchema>;
-
-// 📋 Body Schema
-// Zod schema for request body validation
-const bodySchema = z.instanceof(ZodType);
-type IBody = z.infer<typeof bodySchema>;
-
-// 🔢 Params Schema
-// Zod object schema for URL path parameters
-const paramsSchema = z.instanceof(ZodObject);
-type IParams = z.infer<typeof paramsSchema>;
-
-// ❓ Query Schema
-// Zod object schema for URL query parameters
-const querySchema = z.instanceof(ZodObject);
-type IQuery = z.infer<typeof querySchema>;
-
-// ✅ Response Success Schema
-// Zod schema for successful API responses
-const responseSuccessSchema = z.instanceof(ZodType);
-type IResponseSuccessData = z.infer<typeof responseSuccessSchema>;
-
-// ❌ Response Error Schema
-// Zod schema for error API responses
-const responseErrorSchema = z.instanceof(ZodType);
-type IResponseErrorData = z.infer<typeof responseErrorSchema>;
-
-// 🏗️ API Configuration Entry Type
-// Complete type definition for a single API endpoint configuration
-type IMakeApiConfigEntry<
-  METHOD extends IMethod = IMethod,
-  PATH extends IPath = IPath,
-  TAGS extends ITags = ITags,
-  AUTH extends IAuthStatus = IAuthStatus,
-  RESPONSE_TYPE extends IResponseType = IResponseType,
-  REQUEST_TYPE extends IRequestType = IRequestType,
-  DISABLE extends IDisableStatus = IDisableStatus,
-  DESCRIPTION extends IDescription = IDescription,
-  BODY extends IBody = IBody,
-  PARAMS extends IParams = IParams,
-  QUERY extends IQuery = IQuery,
-  RESPONSE_SUCCESS_DATA extends IResponseSuccessData = IResponseSuccessData,
-  RESPONSE_ERROR_DATA extends IResponseErrorData = IResponseErrorData
-> = {
-  method: METHOD;
-  path: PATH;
-  tags?: [...TAGS];
-  auth?: AUTH;
-  responseType?: RESPONSE_TYPE;
-  requestType?: REQUEST_TYPE;
-  disable?: DISABLE;
-  description?: DESCRIPTION;
-  request: {
-    body: BODY;
-    params: PARAMS;
-    query: QUERY;
-  };
-  response: {
-    success: RESPONSE_SUCCESS_DATA;
-    error: RESPONSE_ERROR_DATA;
-  };
-};
+import adapters, { type AdapterType } from './adapters';
+import type {
+  authStatusSchema,
+  bodySchema,
+  cookiesSchema,
+  descriptionSchema,
+  disableStatusSchema,
+  headersSchema,
+  IAuthStatus,
+  IBody,
+  ICookies,
+  IDescription,
+  IDisableStatus,
+  IHeaders,
+  IHttpStatusCode,
+  IMakeApiConfigEntry,
+  IMethod,
+  IParams,
+  IPath,
+  IQuery,
+  IRequestContentType,
+  IResponseContentType,
+  IResponseErrorData,
+  IResponseSuccessData,
+  ISummary,
+  ITags,
+  methodSchema,
+  paramsSchema,
+  pathSchema,
+  querySchema,
+  requestContentTypeSchema,
+  responseContentTypeSchema,
+  responseErrorSchema,
+  responseSuccessSchema,
+  summarySchema,
+  tagsSchema,
+} from './schemas';
 
 // 🎯 Main API Configuration Factory
 // Creates a fully typed API endpoint configuration with helper methods
+// Can be used to generate OpenAPI/Swagger documentation
 const makeApiConfig = <
   METHOD extends IMethod,
   PATH extends IPath,
   TAGS extends ITags,
   AUTH extends IAuthStatus,
-  RESPONSE_TYPE extends IResponseType,
-  REQUEST_TYPE extends IRequestType,
+  RESPONSE_CONTENT_TYPE extends IResponseContentType,
+  REQUEST_CONTENT_TYPE extends IRequestContentType,
   DISABLE extends IDisableStatus,
+  SUMMARY extends ISummary,
   DESCRIPTION extends IDescription,
   BODY extends IBody,
   PARAMS extends IParams,
   QUERY extends IQuery,
+  HEADERS extends IHeaders,
+  COOKIES extends ICookies,
   RESPONSE_SUCCESS_DATA extends IResponseSuccessData,
   RESPONSE_ERROR_DATA extends IResponseErrorData,
   CONFIG extends IMakeApiConfigEntry<
@@ -148,13 +63,16 @@ const makeApiConfig = <
     PATH,
     TAGS,
     AUTH,
-    RESPONSE_TYPE,
-    REQUEST_TYPE,
+    RESPONSE_CONTENT_TYPE,
+    REQUEST_CONTENT_TYPE,
     DISABLE,
+    SUMMARY,
     DESCRIPTION,
     BODY,
     PARAMS,
     QUERY,
+    HEADERS,
+    COOKIES,
     RESPONSE_SUCCESS_DATA,
     RESPONSE_ERROR_DATA
   >
@@ -181,9 +99,19 @@ const makeApiConfig = <
     return queries;
   };
 
-  // 🔢 Create type-safe URL parameters
+  // 📢 Create type-safe URL parameters
   const makeParams = <PARAMS extends z.infer<CONFIG['request']['params']>>(params: PARAMS) => {
     return params;
+  };
+
+  // 📎 Create type-safe custom headers
+  const makeHeaders = <HEADERS extends z.infer<CONFIG['request']['headers']>>(headers: HEADERS) => {
+    return headers;
+  };
+
+  // 🍪 Create type-safe cookies
+  const makeCookies = <COOKIES extends z.infer<CONFIG['request']['cookies']>>(cookies: COOKIES) => {
+    return cookies;
   };
 
   // 📋 Create ordered list of parameter keys
@@ -217,6 +145,7 @@ const makeApiConfig = <
   };
 
   // 🛣️ Generate full path shape with parameters
+  // Converts /users/:userId format to match OpenAPI path templating
   const makeFullPathShape = <
     KEY extends z.infer<ReturnType<CONFIG['request']['params']['keyof']>>,
     LIST extends KEY[]
@@ -244,6 +173,22 @@ const makeApiConfig = <
     return output as `${CONFIG['path']}${kmType.Advanced.JoinListOfStringInStart<[...LIST], '/:'>}`;
   };
 
+  // 📄 Generate OpenAPI-style path template
+  // Converts /users/:userId to /users/{userId} (OpenAPI 3.0 format)
+  const makeOpenAPIPath = <
+    KEY extends z.infer<ReturnType<CONFIG['request']['params']['keyof']>>,
+    LIST extends KEY[]
+  >(
+    list: [...LIST]
+  ) => {
+    let paramsShape = list.map((item) => `/{${item}}`).join('');
+    return `${entryConfig.path}${paramsShape}`;
+  };
+
+  const convertResponseType = (adapter: AdapterType) => {
+    return adapters.convertResponseType(entryConfig.responseContentType!, adapter);
+  };
+
   return {
     ...entryConfig,
     makeParamsOrderedList,
@@ -251,16 +196,21 @@ const makeApiConfig = <
     makeParamsString,
     makeFullPathShape,
     makeFullPath,
+    makeOpenAPIPath,
     makeBody,
     makeSuccessResponse,
     makeErrorResponse,
     makeQueries,
     makeParams,
+    makeHeaders,
+    makeCookies,
+    convertResponseType,
   };
 };
 
 // 📊 Response Success Shape Factory
 // Creates response wrappers for single items or lists with custom key names
+// Follows common API response patterns compatible with OpenAPI schemas
 const makeResponseSuccessShape = <
   RESPONSE extends IResponseSuccessData,
   KEY_OF_DATA extends string
@@ -278,24 +228,26 @@ const makeResponseSuccessShape = <
       }>;
     },
     // 📋 List response wrapper with additional fields
-    list: <AND extends ZodObject>(and: AND) => {
+    list: <AND extends ZodObject<ZodRawShape>>(and: AND) => {
       let data = z.object({
-        [key]: response,
+        [key]: z.array(response),
       }) as unknown as ZodObject<{
         [key in KEY_OF_DATA]: ZodArray<RESPONSE>;
       }>;
-      return data.extend(and);
+      return data.merge(and);
     },
   };
 };
 
 // 📄 Pagination Schema Factory
 // Standard pagination object for list responses
+// Common pattern in REST APIs, compatible with OpenAPI
 const paginationSchema = () => {
   return z.object({
-    currentPage: z.number().min(1),
-    totalItems: z.number().min(0),
-    itemsPerPage: z.number().min(1),
+    currentPage: z.number().int().min(1),
+    totalItems: z.number().int().min(0),
+    itemsPerPage: z.number().int().min(1),
+    totalPages: z.number().int().min(0).optional(),
   });
 };
 
@@ -304,4 +256,25 @@ export default {
   makeApiConfig,
   makeResponseSuccessShape,
   paginationSchema,
+};
+
+export type {
+  IMethod,
+  IResponseContentType,
+  IRequestContentType,
+  IAuthStatus,
+  IDisableStatus,
+  IPath,
+  ITags,
+  ISummary,
+  IDescription,
+  IBody,
+  IParams,
+  IQuery,
+  IHeaders,
+  ICookies,
+  IResponseSuccessData,
+  IResponseErrorData,
+  IMakeApiConfigEntry,
+  IHttpStatusCode,
 };
