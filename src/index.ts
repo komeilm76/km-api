@@ -1,4 +1,3 @@
-import z from 'zod/v4';
 import {
   convertRequestBody,
   convertResponseType,
@@ -29,8 +28,8 @@ import {
   responseSuccessSchema,
   summarySchema,
   tagsSchema,
-} from './lib/api/schemas';
-import { makeApiConfig, makeResponseSuccessShape, paginationSchema } from './lib/api/v4';
+} from './lib/api-new/schemas';
+import { makeApiConfig, makeResponseSuccessShape, paginationSchema } from './lib/api-new/v4';
 
 export {
   makeApiConfig,
