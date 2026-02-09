@@ -1,2 +1,3 @@
 import * as kmApi from './lib/api';
-export default kmApi;
+export { kmApi };
+export type { kmApi as kmApiType };

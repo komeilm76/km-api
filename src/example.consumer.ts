@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import kmApi from './';
+import { kmApi } from './';
 
 // Simple consumer-style usage to ensure public types work with `zod`
 
