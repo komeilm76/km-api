@@ -1,7 +1,7 @@
 // 📦 Response Content Type Schema (OpenAPI/Swagger Media Types)
 // Based on OpenAPI 3.0 specification - Media Type Objects
 
-import z, { ZodObject, ZodType } from 'zod';
+import z, { ZodObject, ZodType } from 'zod/v4';
 
 // Reference: https://swagger.io/specification/#media-type-object
 const responseContentTypeSchema = z.literal([

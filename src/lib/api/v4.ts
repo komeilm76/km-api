@@ -108,16 +108,16 @@ const makeApiConfig = <
   };
 
   // 🏷️ Generate parameter shape string (e.g., "/:id/:userId")
-  // const makeParamsStringShape = <
-  //   KEY extends z.infer<ReturnType<CONFIG['request']['params']['keyof']>>,
-  //   LIST extends KEY[]
-  // >(
-  //   list: [...LIST]
-  // ) => {
-  //   return list
-  //     .map((item) => `/:${item}`)
-  //     .join('') as unknown as kmType.Advanced.JoinListOfStringInStart<[...LIST], '/:'>;
-  // };
+  const makeParamsStringShape = <
+    KEY extends z.infer<ReturnType<CONFIG['request']['params']['keyof']>>,
+    LIST extends KEY[]
+  >(
+    list: [...LIST]
+  ) => {
+    return list
+      .map((item) => `/:${item}`)
+      .join('') as unknown as kmType.Advanced.JoinListOfStringInStart<[...LIST], '/:'>;
+  };
 
   // 🔗 Generate parameter string from values
   const makeParamsString = <PARAMS extends z.infer<CONFIG['request']['params']>>(
@@ -129,19 +129,19 @@ const makeApiConfig = <
 
   // 🛣️ Generate full path shape with parameters
   // Converts /users/:userId format to match OpenAPI path templating
-  // const makeFullPathShape = <
-  //   KEY extends z.infer<ReturnType<CONFIG['request']['params']['keyof']>>,
-  //   LIST extends KEY[]
-  // >(
-  //   list: [...LIST]
-  // ) => {
-  //   let paramsShape = list
-  //     .map((item) => `/:${item}`)
-  //     .join('') as unknown as kmType.Advanced.JoinListOfStringInStart<[...LIST], '/:'>;
+  const makeFullPathShape = <
+    KEY extends z.infer<ReturnType<CONFIG['request']['params']['keyof']>>,
+    LIST extends KEY[]
+  >(
+    list: [...LIST]
+  ) => {
+    let paramsShape = list
+      .map((item) => `/:${item}`)
+      .join('') as unknown as kmType.Advanced.JoinListOfStringInStart<[...LIST], '/:'>;
 
-  //   let output = `${entryConfig.path}${paramsShape}`;
-  //   return output as `${CONFIG['path']}${kmType.Advanced.JoinListOfStringInStart<[...LIST], '/:'>}`;
-  // };
+    let output = `${entryConfig.path}${paramsShape}`;
+    return output as `${CONFIG['path']}${kmType.Advanced.JoinListOfStringInStart<[...LIST], '/:'>}`;
+  };
 
   // 🎯 Generate complete path with parameter values
   const makeFullPath = <
@@ -158,15 +158,15 @@ const makeApiConfig = <
 
   // 📄 Generate OpenAPI-style path template
   // Converts /users/:userId to /users/{userId} (OpenAPI 3.0 format)
-  // const makeOpenAPIPath = <
-  //   KEY extends z.infer<ReturnType<CONFIG['request']['params']['keyof']>>,
-  //   LIST extends KEY[]
-  // >(
-  //   list: [...LIST]
-  // ) => {
-  //   let paramsShape = list.map((item) => `/{${item}}`).join('');
-  //   return `${entryConfig.path}${paramsShape}`;
-  // };
+  const makeOpenAPIPath = <
+    KEY extends z.infer<ReturnType<CONFIG['request']['params']['keyof']>>,
+    LIST extends KEY[]
+  >(
+    list: [...LIST]
+  ) => {
+    let paramsShape = list.map((item) => `/{${item}}`).join('');
+    return `${entryConfig.path}${paramsShape}`;
+  };
 
   const convertResponseType = (adapterType: AdapterType) => {
     return _convertResponseType(entryConfig.responseContentType!, adapterType);
@@ -175,11 +175,11 @@ const makeApiConfig = <
   return {
     ...entryConfig,
     makeParamsOrderedList,
-    // makeParamsStringShape,
+    makeParamsStringShape,
     makeParamsString,
-    // makeFullPathShape,
+    makeFullPathShape,
     makeFullPath,
-    // makeOpenAPIPath,
+    makeOpenAPIPath,
     makeBody,
     makeSuccessResponse,
     makeErrorResponse,
