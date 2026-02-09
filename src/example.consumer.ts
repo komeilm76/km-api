@@ -1,12 +1,6 @@
 import { z } from 'zod';
 
-import {
-  makeApiConfig,
-  requestContentTypeSchema,
-  responseContentTypeSchema,
-  methodSchema,
-  pathSchema,
-} from './index';
+import { makeApiConfig } from './index';
 
 // Simple consumer-style usage to ensure public types work with `zod`
 
@@ -19,19 +13,13 @@ const errorSchema = z.object({
   message: z.string(),
 });
 
-// Use the literal schemas just to ensure they type-check in a consumer scenario
-const method = methodSchema._def.values[0]!;
-const path = pathSchema.parse('/example');
-const requestContentType = requestContentTypeSchema._def.values[0];
-const responseContentType = responseContentTypeSchema._def.values[0];
-
 const apiConfig = makeApiConfig({
-  method,
-  path,
+  method: 'Get',
+  path: '/example',
   tags: ['#example'],
   auth: 'NO',
-  requestContentType,
-  responseContentType,
+  requestContentType: 'application/json',
+  responseContentType: 'application/json',
   request: {
     body: z.object({}),
     params: z.object({}),
