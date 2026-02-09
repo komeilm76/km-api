@@ -1,6 +1,6 @@
-import { z, ZodArray, ZodObject, type ZodRawShape } from 'zod/v4';
+import { z, ZodArray, ZodObject, type ZodRawShape } from 'zod';
 import kmType from 'km-type';
-import { convertResponseType as _convertResponseType, type AdapterType } from './adapters';
+import * as adapters from './adapters';
 import type {
   IAuthStatus,
   IBody,
@@ -21,7 +21,7 @@ import type {
   ITags,
 } from './schemas';
 
-// 🎯 Main API Configuration Factory
+// 🎯 Main API Configuration Factory (stable / api-new)
 // Creates a fully typed API endpoint configuration with helper methods
 // Can be used to generate OpenAPI/Swagger documentation
 const makeApiConfig = <
@@ -99,7 +99,7 @@ const makeApiConfig = <
 
   // 📋 Create ordered list of parameter keys
   const makeParamsOrderedList = <
-    KEY extends Extract<keyof z.infer<CONFIG['request']['params']>, string>,
+    KEY extends z.infer<ReturnType<CONFIG['request']['params']['keyof']>>,
     KEYS extends [...KEY[]]
   >(
     list: KEYS
@@ -109,7 +109,7 @@ const makeApiConfig = <
 
   // 🏷️ Generate parameter shape string (e.g., "/:id/:userId")
   const makeParamsStringShape = <
-    KEY extends Extract<keyof z.infer<CONFIG['request']['params']>, string>,
+    KEY extends z.infer<ReturnType<CONFIG['request']['params']['keyof']>>,
     LIST extends KEY[]
   >(
     list: [...LIST]
@@ -130,7 +130,7 @@ const makeApiConfig = <
   // 🛣️ Generate full path shape with parameters
   // Converts /users/:userId format to match OpenAPI path templating
   const makeFullPathShape = <
-    KEY extends Extract<keyof z.infer<CONFIG['request']['params']>, string>,
+    KEY extends z.infer<ReturnType<CONFIG['request']['params']['keyof']>>,
     LIST extends KEY[]
   >(
     list: [...LIST]
@@ -145,7 +145,7 @@ const makeApiConfig = <
 
   // 🎯 Generate complete path with parameter values
   const makeFullPath = <
-    KEY extends Extract<keyof z.infer<CONFIG['request']['params']>, string>,
+    KEY extends z.infer<ReturnType<CONFIG['request']['params']['keyof']>>,
     LIST extends KEY[],
     PARAMS extends z.infer<CONFIG['request']['params']>
   >(
@@ -156,8 +156,20 @@ const makeApiConfig = <
     return output as `${CONFIG['path']}${kmType.Advanced.JoinListOfStringInStart<[...LIST], '/:'>}`;
   };
 
-  const convertResponseType = (adapterType: AdapterType) => {
-    return _convertResponseType(entryConfig.responseContentType!, adapterType);
+  // 📄 Generate OpenAPI-style path template
+  // Converts /users/:userId to /users/{userId} (OpenAPI 3.0 format)
+  const makeOpenAPIPath = <
+    KEY extends z.infer<ReturnType<CONFIG['request']['params']['keyof']>>,
+    LIST extends KEY[]
+  >(
+    list: [...LIST]
+  ) => {
+    let paramsShape = list.map((item) => `/{${item}}`).join('');
+    return `${entryConfig.path}${paramsShape}`;
+  };
+
+  const convertResponseType = (adapterType: adapters.AdapterType) => {
+    return adapters.convertResponseType(entryConfig.responseContentType!, adapterType);
   };
 
   return {
@@ -167,6 +179,7 @@ const makeApiConfig = <
     makeParamsString,
     makeFullPathShape,
     makeFullPath,
+    makeOpenAPIPath,
     makeBody,
     makeSuccessResponse,
     makeErrorResponse,

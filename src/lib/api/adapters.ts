@@ -454,20 +454,6 @@ function convertResponseType<T extends AdapterType>(
   }
 }
 
-/**
- * Batch convert multiple content types for a specific adapter
- *
- * @param contentTypes - Array of OpenAPI content types
- * @param adapter - Target adapter type
- * @returns Array of adapter configurations
- */
-function convertResponseTypes<T extends AdapterType>(
-  contentTypes: IResponseContentType[],
-  adapter: T
-): AdapterConfig<T>[] {
-  return contentTypes.map((ct) => convertResponseType(ct, adapter));
-}
-
 // ==========================================
 // REQUEST BODY CONVERSION (For future use)
 // ==========================================
@@ -853,7 +839,6 @@ function safeConvertRequestBody(data: any, contentType: IRequestContentType): Al
 export {
   // Response type conversion
   convertResponseType,
-  convertResponseTypes,
   toAxiosResponseType,
   toUniAppResponseType,
   toXHRResponseType,

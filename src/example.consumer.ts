@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { makeApiConfig } from './index';
+import kmApi from './';
 
 // Simple consumer-style usage to ensure public types work with `zod`
 
@@ -13,7 +13,7 @@ const errorSchema = z.object({
   message: z.string(),
 });
 
-const apiConfig = makeApiConfig({
+const apiConfig = kmApi.v4.makeApiConfig({
   method: 'Get',
   path: '/example',
   tags: ['#example'],

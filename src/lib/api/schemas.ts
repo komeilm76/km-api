@@ -1,11 +1,12 @@
+import z, { ZodObject, ZodType } from 'zod';
+
+// Re-export of the stable schemas, using the public `zod` entrypoint
+// to avoid depending on internal Zod module paths.
+
 // 📦 Response Content Type Schema (OpenAPI/Swagger Media Types)
 // Based on OpenAPI 3.0 specification - Media Type Objects
-
-import z from 'zod/v4';
-import { $ZodObject, $ZodType } from 'zod/v4/core';
-
 // Reference: https://swagger.io/specification/#media-type-object
-const responseContentTypeSchema = z.literal([
+const responseContentTypeSchema = z.enum([
   // ========== APPLICATION TYPES ==========
   // swagger_&_openapi_supported - Standard JSON response
   'application/json',
@@ -130,12 +131,12 @@ const responseContentTypeSchema = z.literal([
   'application/vnd.github.v3.patch',
   // openapi_supported - OpenStreetMap data
   'application/vnd.openstreetmap.data+xml',
-]);
+] as const);
 
 // 📤 Request Content Type Schema (OpenAPI/Swagger Media Types)
 // Based on OpenAPI 3.0 specification - Request Body Object
 // Reference: https://swagger.io/specification/#request-body-object
-const requestContentTypeSchema = z.literal([
+const requestContentTypeSchema = z.enum([
   // ========== APPLICATION TYPES ==========
   // swagger_&_openapi_supported - JSON request body
   'application/json',
@@ -213,15 +214,14 @@ const requestContentTypeSchema = z.literal([
   // ========== VENDOR-SPECIFIC TYPES ==========
   // openapi_supported - GitHub API requests
   'application/vnd.github+json',
-]);
+] as const);
 
 type IResponseContentType = z.infer<typeof responseContentTypeSchema>;
 type IRequestContentType = z.infer<typeof requestContentTypeSchema>;
 
 // 🌐 HTTP Method Schema
 // OpenAPI 3.0 & Swagger 2.0 support: GET, POST, PUT, DELETE, HEAD, OPTIONS, PATCH
-// Using Zod v4 z.literal() with multiple values for better performance
-const methodSchema = z.literal([
+const methodSchema = z.enum([
   'get',
   'GET',
   'Get',
@@ -243,18 +243,18 @@ const methodSchema = z.literal([
   'patch',
   'PATCH',
   'Patch',
-]);
+] as const);
 type IMethod = z.infer<typeof methodSchema>;
 
 // 🔐 Authentication Status Schema
 // OpenAPI: security schemes (apiKey, http, oauth2, openIdConnect)
 // This is a simplified boolean indicator, actual auth details go in security definitions
-const authStatusSchema = z.literal(['YES', 'NO']);
+const authStatusSchema = z.enum(['YES', 'NO'] as const);
 type IAuthStatus = z.infer<typeof authStatusSchema>;
 
 // 🚫 Disable Status Schema
 // Not part of OpenAPI spec - custom extension for internal use
-const disableStatusSchema = z.literal(['YES', 'NO']);
+const disableStatusSchema = z.enum(['YES', 'NO'] as const);
 type IDisableStatus = z.infer<typeof disableStatusSchema>;
 
 // 🛣️ Path Schema
@@ -285,44 +285,44 @@ type ISummary = z.infer<typeof summarySchema>;
 // 📋 Body Schema
 // OpenAPI: requestBody schema
 // Zod schema for request body validation
-const bodySchema = z.instanceof($ZodType);
+const bodySchema = z.instanceof(ZodType);
 type IBody = z.infer<typeof bodySchema>;
 
 // 📢 Params Schema
 // OpenAPI: path parameters
 // Reference: https://swagger.io/specification/#parameter-object (in: path)
-const paramsSchema = z.instanceof($ZodObject);
+const paramsSchema = z.instanceof(ZodObject);
 type IParams = z.infer<typeof paramsSchema>;
 
 // ❓ Query Schema
 // OpenAPI: query parameters
 // Reference: https://swagger.io/specification/#parameter-object (in: query)
-const querySchema = z.instanceof($ZodObject);
+const querySchema = z.instanceof(ZodObject);
 type IQuery = z.infer<typeof querySchema>;
 
 // 📎 Headers Schema
 // OpenAPI: header parameters
 // Reference: https://swagger.io/specification/#parameter-object (in: header)
-const headersSchema = z.instanceof($ZodObject);
+const headersSchema = z.instanceof(ZodObject);
 type IHeaders = z.infer<typeof headersSchema>;
 
 // 🍪 Cookies Schema
 // OpenAPI 3.0: cookie parameters
 // Reference: https://swagger.io/specification/#parameter-object (in: cookie)
 // Note: Not supported in Swagger 2.0
-const cookiesSchema = z.instanceof($ZodObject);
+const cookiesSchema = z.instanceof(ZodObject);
 type ICookies = z.infer<typeof cookiesSchema>;
 
 // ✅ Response Success Schema
 // OpenAPI: response schema for 2xx status codes
 // Reference: https://swagger.io/specification/#response-object
-const responseSuccessSchema = z.instanceof($ZodType);
+const responseSuccessSchema = z.instanceof(ZodType);
 type IResponseSuccessData = z.infer<typeof responseSuccessSchema>;
 
 // ❌ Response Error Schema
 // OpenAPI: response schema for 4xx/5xx status codes
 // Reference: https://swagger.io/specification/#response-object
-const responseErrorSchema = z.instanceof($ZodType);
+const responseErrorSchema = z.instanceof(ZodType);
 type IResponseErrorData = z.infer<typeof responseErrorSchema>;
 
 // 🗝️ API Configuration Entry Type
@@ -390,7 +390,7 @@ type IMakeApiConfigEntry<
 // 🔢 HTTP Status Code Schema
 // OpenAPI: status codes for responses
 // Reference: https://swagger.io/specification/#responses-object
-const httpStatusCodeSchema = z.literal([
+const httpStatusCodes = [
   // 2xx Success
   200, 201, 202, 203, 204, 205, 206,
   // 3xx Redirection
@@ -400,10 +400,65 @@ const httpStatusCodeSchema = z.literal([
   422, 423, 424, 425, 426, 428, 429, 431, 451,
   // 5xx Server Errors
   500, 501, 502, 503, 504, 505, 506, 507, 508, 510, 511,
+] as const;
+
+const httpStatusCodeSchema = z.union([
+  z.literal(200),
+  z.literal(201),
+  z.literal(202),
+  z.literal(203),
+  z.literal(204),
+  z.literal(205),
+  z.literal(206),
+  z.literal(300),
+  z.literal(301),
+  z.literal(302),
+  z.literal(303),
+  z.literal(304),
+  z.literal(307),
+  z.literal(308),
+  z.literal(400),
+  z.literal(401),
+  z.literal(402),
+  z.literal(403),
+  z.literal(404),
+  z.literal(405),
+  z.literal(406),
+  z.literal(407),
+  z.literal(408),
+  z.literal(409),
+  z.literal(410),
+  z.literal(411),
+  z.literal(412),
+  z.literal(413),
+  z.literal(414),
+  z.literal(415),
+  z.literal(416),
+  z.literal(417),
+  z.literal(418),
+  z.literal(422),
+  z.literal(423),
+  z.literal(424),
+  z.literal(425),
+  z.literal(426),
+  z.literal(428),
+  z.literal(429),
+  z.literal(431),
+  z.literal(451),
+  z.literal(500),
+  z.literal(501),
+  z.literal(502),
+  z.literal(503),
+  z.literal(504),
+  z.literal(505),
+  z.literal(506),
+  z.literal(507),
+  z.literal(508),
+  z.literal(510),
+  z.literal(511),
 ]);
 type IHttpStatusCode = z.infer<typeof httpStatusCodeSchema>;
 
-// 📤 Export types
 export type {
   IResponseContentType,
   IRequestContentType,
@@ -425,7 +480,6 @@ export type {
   IHttpStatusCode,
 };
 
-// 📤 Export individual schemas for advanced usage
 export {
   responseContentTypeSchema,
   requestContentTypeSchema,
