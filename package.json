@@ -1,6 +1,6 @@
 {
   "name": "km-api",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "license": "MIT",
   "description": "its package for make api services easy",
   "main": "build/js/index.js",
