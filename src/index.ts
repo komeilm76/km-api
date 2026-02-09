@@ -1,4 +1,68 @@
-import z from 'zod';
-import lib from './lib';
-const kmApi = lib as typeof lib;
-export default kmApi;
+import {
+  convertRequestBody,
+  convertResponseType,
+  convertResponseTypes,
+  needsConversion,
+  safeConvertRequestBody,
+  toAxiosResponseType,
+  toFetchResponseMethod,
+  toTaroResponseType,
+  toUniAppResponseType,
+  toXHRResponseType,
+} from './lib/api/adapters';
+import {
+  authStatusSchema,
+  bodySchema,
+  cookiesSchema,
+  descriptionSchema,
+  disableStatusSchema,
+  headersSchema,
+  httpStatusCodeSchema,
+  methodSchema,
+  paramsSchema,
+  pathSchema,
+  querySchema,
+  requestContentTypeSchema,
+  responseContentTypeSchema,
+  responseErrorSchema,
+  responseSuccessSchema,
+  summarySchema,
+  tagsSchema,
+} from './lib/api/schemas';
+import { makeApiConfig, makeResponseSuccessShape, paginationSchema } from './lib/api/v4';
+
+export {
+  makeApiConfig,
+  makeResponseSuccessShape,
+  paginationSchema,
+  responseContentTypeSchema,
+  requestContentTypeSchema,
+  methodSchema,
+  authStatusSchema,
+  disableStatusSchema,
+  pathSchema,
+  tagsSchema,
+  descriptionSchema,
+  summarySchema,
+  bodySchema,
+  paramsSchema,
+  querySchema,
+  headersSchema,
+  cookiesSchema,
+  responseSuccessSchema,
+  responseErrorSchema,
+  httpStatusCodeSchema,
+  // Response type conversion
+  convertResponseType,
+  convertResponseTypes,
+  toAxiosResponseType,
+  toUniAppResponseType,
+  toXHRResponseType,
+  toTaroResponseType,
+  toFetchResponseMethod,
+
+  // Request body conversion
+  convertRequestBody,
+  safeConvertRequestBody,
+  needsConversion,
+};

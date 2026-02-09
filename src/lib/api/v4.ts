@@ -1,20 +1,13 @@
-import { z, ZodArray, ZodObject, ZodType, type ZodRawShape } from 'zod/v4';
+import { z, ZodArray, ZodObject, type ZodRawShape } from 'zod/v4';
 import kmType from 'km-type';
-import adapters, { type AdapterType } from './adapters';
+import { convertResponseType as _convertResponseType, type AdapterType } from './adapters';
 import type {
-  authStatusSchema,
-  bodySchema,
-  cookiesSchema,
-  descriptionSchema,
-  disableStatusSchema,
-  headersSchema,
   IAuthStatus,
   IBody,
   ICookies,
   IDescription,
   IDisableStatus,
   IHeaders,
-  IHttpStatusCode,
   IMakeApiConfigEntry,
   IMethod,
   IParams,
@@ -26,16 +19,6 @@ import type {
   IResponseSuccessData,
   ISummary,
   ITags,
-  methodSchema,
-  paramsSchema,
-  pathSchema,
-  querySchema,
-  requestContentTypeSchema,
-  responseContentTypeSchema,
-  responseErrorSchema,
-  responseSuccessSchema,
-  summarySchema,
-  tagsSchema,
 } from './schemas';
 
 // 🎯 Main API Configuration Factory
@@ -185,8 +168,8 @@ const makeApiConfig = <
     return `${entryConfig.path}${paramsShape}`;
   };
 
-  const convertResponseType = (adapter: AdapterType) => {
-    return adapters.convertResponseType(entryConfig.responseContentType!, adapter);
+  const convertResponseType = (adapterType: AdapterType) => {
+    return _convertResponseType(entryConfig.responseContentType!, adapterType);
   };
 
   return {
@@ -252,29 +235,4 @@ const paginationSchema = () => {
 };
 
 // 🎁 Export all utilities
-export default {
-  makeApiConfig,
-  makeResponseSuccessShape,
-  paginationSchema,
-};
-
-export type {
-  IMethod,
-  IResponseContentType,
-  IRequestContentType,
-  IAuthStatus,
-  IDisableStatus,
-  IPath,
-  ITags,
-  ISummary,
-  IDescription,
-  IBody,
-  IParams,
-  IQuery,
-  IHeaders,
-  ICookies,
-  IResponseSuccessData,
-  IResponseErrorData,
-  IMakeApiConfigEntry,
-  IHttpStatusCode,
-};
+export { makeApiConfig, makeResponseSuccessShape, paginationSchema };

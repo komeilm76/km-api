@@ -23,13 +23,13 @@ import type { IRequestContentType, IResponseContentType } from './schemas';
  * Axios response type configuration
  * Reference: https://axios-http.com/docs/req_config
  */
-export type AxiosResponseType = 'arraybuffer' | 'blob' | 'document' | 'json' | 'text' | 'stream';
+type AxiosResponseType = 'arraybuffer' | 'blob' | 'document' | 'json' | 'text' | 'stream';
 
 /**
  * Axios response encoding
  * Reference: https://axios-http.com/docs/req_config
  */
-export type AxiosResponseEncoding =
+type AxiosResponseEncoding =
   | 'ascii'
   | 'ASCII'
   | 'ansi'
@@ -55,7 +55,7 @@ export type AxiosResponseEncoding =
   | 'utf16le'
   | 'UTF16LE';
 
-export interface AxiosAdapterConfig {
+interface AxiosAdapterConfig {
   responseType: AxiosResponseType;
   responseEncoding?: AxiosResponseEncoding;
 }
@@ -68,11 +68,11 @@ export interface AxiosAdapterConfig {
  * UniApp response type configuration
  * Reference: https://uniapp.dcloud.net.cn/api/request/request.html
  */
-export type UniAppResponseType = 'text' | 'arraybuffer';
+type UniAppResponseType = 'text' | 'arraybuffer';
 
-export type UniAppDataType = 'json' | 'other';
+type UniAppDataType = 'json' | 'other';
 
-export interface UniAppAdapterConfig {
+interface UniAppAdapterConfig {
   responseType: UniAppResponseType;
   dataType?: UniAppDataType;
 }
@@ -85,9 +85,9 @@ export interface UniAppAdapterConfig {
  * XMLHttpRequest response type
  * Reference: https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/responseType
  */
-export type XHRResponseType = '' | 'arraybuffer' | 'blob' | 'document' | 'json' | 'text';
+type XHRResponseType = '' | 'arraybuffer' | 'blob' | 'document' | 'json' | 'text';
 
-export interface XHRAdapterConfig {
+interface XHRAdapterConfig {
   responseType: XHRResponseType;
 }
 
@@ -99,11 +99,11 @@ export interface XHRAdapterConfig {
  * Taro response type configuration
  * Reference: https://taro-docs.jd.com/docs/apis/network/request/
  */
-export type TaroResponseType = 'text' | 'arraybuffer';
+type TaroResponseType = 'text' | 'arraybuffer';
 
-export type TaroDataType = 'json' | 'text' | 'base64' | 'arraybuffer';
+type TaroDataType = 'json' | 'text' | 'base64' | 'arraybuffer';
 
-export interface TaroAdapterConfig {
+interface TaroAdapterConfig {
   responseType: TaroResponseType;
   dataType?: TaroDataType;
 }
@@ -116,9 +116,9 @@ export interface TaroAdapterConfig {
  * Fetch API response methods
  * Reference: https://developer.mozilla.org/en-US/docs/Web/API/Response
  */
-export type FetchResponseMethod = 'arrayBuffer' | 'blob' | 'formData' | 'json' | 'text';
+type FetchResponseMethod = 'arrayBuffer' | 'blob' | 'formData' | 'json' | 'text';
 
-export interface FetchAdapterConfig {
+interface FetchAdapterConfig {
   responseMethod: FetchResponseMethod;
 }
 
@@ -126,15 +126,9 @@ export interface FetchAdapterConfig {
 // UNIFIED ADAPTER TYPE
 // ==========================================
 
-export type AdapterType =
-  | 'axios'
-  | 'alova-axios'
-  | 'alova-uniapp'
-  | 'alova-xhr'
-  | 'alova-taro'
-  | 'fetch';
+type AdapterType = 'axios' | 'alova-axios' | 'alova-uniapp' | 'alova-xhr' | 'alova-taro' | 'fetch';
 
-export type AdapterConfig<T extends AdapterType> = T extends 'axios' | 'alova-axios'
+type AdapterConfig<T extends AdapterType> = T extends 'axios' | 'alova-axios'
   ? AxiosAdapterConfig
   : T extends 'alova-uniapp'
   ? UniAppAdapterConfig
@@ -250,7 +244,7 @@ const extractCharset = (contentType: string): AxiosResponseEncoding => {
  * // { responseType: 'blob' }
  * ```
  */
-export const toAxiosResponseType = (contentType: IResponseContentType): AxiosAdapterConfig => {
+const toAxiosResponseType = (contentType: IResponseContentType): AxiosAdapterConfig => {
   const category = contentTypeCategory(contentType);
 
   switch (category) {
@@ -285,7 +279,7 @@ export const toAxiosResponseType = (contentType: IResponseContentType): AxiosAda
  * @param contentType - OpenAPI standard content type
  * @returns UniApp-compatible response type and data type
  */
-export const toUniAppResponseType = (contentType: IResponseContentType): UniAppAdapterConfig => {
+const toUniAppResponseType = (contentType: IResponseContentType): UniAppAdapterConfig => {
   const category = contentTypeCategory(contentType);
 
   switch (category) {
@@ -320,7 +314,7 @@ export const toUniAppResponseType = (contentType: IResponseContentType): UniAppA
  * @param contentType - OpenAPI standard content type
  * @returns XHR-compatible response type
  */
-export const toXHRResponseType = (contentType: IResponseContentType): XHRAdapterConfig => {
+const toXHRResponseType = (contentType: IResponseContentType): XHRAdapterConfig => {
   const category = contentTypeCategory(contentType);
 
   switch (category) {
@@ -350,7 +344,7 @@ export const toXHRResponseType = (contentType: IResponseContentType): XHRAdapter
  * @param contentType - OpenAPI standard content type
  * @returns Taro-compatible response type and data type
  */
-export const toTaroResponseType = (contentType: IResponseContentType): TaroAdapterConfig => {
+const toTaroResponseType = (contentType: IResponseContentType): TaroAdapterConfig => {
   const category = contentTypeCategory(contentType);
 
   switch (category) {
@@ -386,7 +380,7 @@ export const toTaroResponseType = (contentType: IResponseContentType): TaroAdapt
  * @param contentType - OpenAPI standard content type
  * @returns Fetch API response method to call
  */
-export const toFetchResponseMethod = (contentType: IResponseContentType): FetchAdapterConfig => {
+const toFetchResponseMethod = (contentType: IResponseContentType): FetchAdapterConfig => {
   const category = contentTypeCategory(contentType);
 
   switch (category) {
@@ -433,7 +427,7 @@ export const toFetchResponseMethod = (contentType: IResponseContentType): FetchA
  * // { responseMethod: 'text' }
  * ```
  */
-export function convertResponseType<T extends AdapterType>(
+function convertResponseType<T extends AdapterType>(
   contentType: IResponseContentType,
   adapter: T
 ): AdapterConfig<T> {
@@ -467,7 +461,7 @@ export function convertResponseType<T extends AdapterType>(
  * @param adapter - Target adapter type
  * @returns Array of adapter configurations
  */
-export function convertResponseTypes<T extends AdapterType>(
+function convertResponseTypes<T extends AdapterType>(
   contentTypes: IResponseContentType[],
   adapter: T
 ): AdapterConfig<T>[] {
@@ -482,7 +476,7 @@ export function convertResponseTypes<T extends AdapterType>(
  * Alova/Axios supported request body types
  * Reference: https://alova.js.org/ and https://axios-http.com/
  */
-export type AlovaRequestBody =
+type AlovaRequestBody =
   | string
   | FormData
   | Blob
@@ -515,7 +509,7 @@ export type AlovaRequestBody =
  * // Returns: blob (unchanged)
  * ```
  */
-export function convertRequestBody(data: any, contentType: IRequestContentType): AlovaRequestBody {
+function convertRequestBody(data: any, contentType: IRequestContentType): AlovaRequestBody {
   // If data is null or undefined, return as-is
   if (data === null || data === undefined) {
     return data;
@@ -756,7 +750,7 @@ export function convertRequestBody(data: any, contentType: IRequestContentType):
  * needsConversion({ file: blob }, 'multipart/form-data'); // true
  * ```
  */
-export function needsConversion(data: any, contentType: IRequestContentType): boolean {
+function needsConversion(data: any, contentType: IRequestContentType): boolean {
   if (data === null || data === undefined) {
     return false;
   }
@@ -842,10 +836,7 @@ export function needsConversion(data: any, contentType: IRequestContentType): bo
  * // Returns unchanged: formData
  * ```
  */
-export function safeConvertRequestBody(
-  data: any,
-  contentType: IRequestContentType
-): AlovaRequestBody {
+function safeConvertRequestBody(data: any, contentType: IRequestContentType): AlovaRequestBody {
   // Check if conversion is needed
   if (!needsConversion(data, contentType)) {
     return data;
@@ -855,26 +846,11 @@ export function safeConvertRequestBody(
   return convertRequestBody(data, contentType);
 }
 
-/**
- * Convert request body to appropriate format based on content type
- * This is kept for backward compatibility
- *
- * @deprecated Use safeConvertRequestBody instead
- */
-export function convertRequestType<T extends AdapterType>(
-  contentType: IRequestContentType,
-  adapter: T
-): { contentType: string } {
-  // Most HTTP clients use the content type directly in headers
-  // This function exists for future adapter-specific transformations
-  return { contentType };
-}
-
 // ==========================================
 // EXPORTS
 // ==========================================
 
-export default {
+export {
   // Response type conversion
   convertResponseType,
   convertResponseTypes,
@@ -888,4 +864,22 @@ export default {
   convertRequestBody,
   safeConvertRequestBody,
   needsConversion,
+};
+
+export type {
+  AxiosResponseType,
+  AxiosResponseEncoding,
+  AxiosAdapterConfig,
+  UniAppResponseType,
+  UniAppDataType,
+  UniAppAdapterConfig,
+  XHRResponseType,
+  XHRAdapterConfig,
+  TaroResponseType,
+  TaroDataType,
+  TaroAdapterConfig,
+  FetchResponseMethod,
+  FetchAdapterConfig,
+  AdapterType,
+  AdapterConfig,
 };
