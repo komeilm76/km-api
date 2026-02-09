@@ -1,8 +1,7 @@
 // 📦 Response Content Type Schema (OpenAPI/Swagger Media Types)
 // Based on OpenAPI 3.0 specification - Media Type Objects
 
-import z from 'zod/v4';
-import { $ZodObject, $ZodType } from 'zod/v4/core';
+import z, { ZodObject, ZodType } from 'zod/v4';
 
 // Reference: https://swagger.io/specification/#media-type-object
 const responseContentTypeSchema = z.literal([
@@ -285,44 +284,44 @@ type ISummary = z.infer<typeof summarySchema>;
 // 📋 Body Schema
 // OpenAPI: requestBody schema
 // Zod schema for request body validation
-const bodySchema = z.instanceof($ZodType);
+const bodySchema = z.instanceof(ZodType);
 type IBody = z.infer<typeof bodySchema>;
 
 // 📢 Params Schema
 // OpenAPI: path parameters
 // Reference: https://swagger.io/specification/#parameter-object (in: path)
-const paramsSchema = z.instanceof($ZodObject);
+const paramsSchema = z.instanceof(ZodObject);
 type IParams = z.infer<typeof paramsSchema>;
 
 // ❓ Query Schema
 // OpenAPI: query parameters
 // Reference: https://swagger.io/specification/#parameter-object (in: query)
-const querySchema = z.instanceof($ZodObject);
+const querySchema = z.instanceof(ZodObject);
 type IQuery = z.infer<typeof querySchema>;
 
 // 📎 Headers Schema
 // OpenAPI: header parameters
 // Reference: https://swagger.io/specification/#parameter-object (in: header)
-const headersSchema = z.instanceof($ZodObject);
+const headersSchema = z.instanceof(ZodObject);
 type IHeaders = z.infer<typeof headersSchema>;
 
 // 🍪 Cookies Schema
 // OpenAPI 3.0: cookie parameters
 // Reference: https://swagger.io/specification/#parameter-object (in: cookie)
 // Note: Not supported in Swagger 2.0
-const cookiesSchema = z.instanceof($ZodObject);
+const cookiesSchema = z.instanceof(ZodObject);
 type ICookies = z.infer<typeof cookiesSchema>;
 
 // ✅ Response Success Schema
 // OpenAPI: response schema for 2xx status codes
 // Reference: https://swagger.io/specification/#response-object
-const responseSuccessSchema = z.instanceof($ZodType);
+const responseSuccessSchema = z.instanceof(ZodType);
 type IResponseSuccessData = z.infer<typeof responseSuccessSchema>;
 
 // ❌ Response Error Schema
 // OpenAPI: response schema for 4xx/5xx status codes
 // Reference: https://swagger.io/specification/#response-object
-const responseErrorSchema = z.instanceof($ZodType);
+const responseErrorSchema = z.instanceof(ZodType);
 type IResponseErrorData = z.infer<typeof responseErrorSchema>;
 
 // 🗝️ API Configuration Entry Type
