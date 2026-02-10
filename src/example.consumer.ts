@@ -14,34 +14,48 @@ const errorSchema = z.object({
 });
 
 const apiConfig = kmApi.v4.makeApiConfig({
-  method: 'Get',
-  path: '/example',
-  tags: ['#example'],
-  auth: 'NO',
-  requestContentType: 'application/json',
+  method: 'get',
+  pathShape: '/users/:id/gholi/:username',
+  tags: ['#users'],
+  auth: 'YES',
   responseContentType: 'application/json',
+  summary: 'Get user by ID',
+  description: 'Retrieves a user by their unique identifier',
   request: {
-    body: z.object({}),
-    params: z.object({}),
-    query: z.object({}),
-    headers: z.object({}),
-    cookies: z.object({}),
+    body: z.object({
+      name: z.string(),
+      age: z.number(),
+    }),
+    params: z.object({ id: z.string(), username: z.string() }),
+    query: z.object({
+      search: z.string().optional(),
+    }),
+    headers: z.object({
+      'x-api-key': z.string().optional(),
+    }),
+    cookies: z.object({
+      sessionId: z.string().optional(),
+    }),
   },
   response: {
-    success: userSchema,
-    error: errorSchema,
+    success: z.object({
+      id: z.string(),
+      name: z.string(),
+      email: z.string(),
+    }),
+    error: z.object({
+      code: z.number(),
+      message: z.string(),
+    }),
   },
 });
 
 // Exercise helpers so their types are validated
-apiConfig.makeParamsOrderedList([]);
-apiConfig.makeParamsStringShape([]);
-apiConfig.makeFullPathShape([]);
-apiConfig.makeOpenAPIPath([]);
-apiConfig.makeBody({});
-apiConfig.makeSuccessResponse({ id: '1', name: 'John' });
-apiConfig.makeErrorResponse({ message: 'error' });
+apiConfig.makeOpenAPIPath();
+apiConfig.makeBody({ age: 12, name: 'john' });
+apiConfig.makeSuccessResponse({ id: '123', name: 'john', email: 'john@example.com' });
+apiConfig.makeErrorResponse({ code: 404, message: 'User not found' });
 apiConfig.makeQueries({});
-apiConfig.makeParams({});
-apiConfig.makeHeaders({});
-apiConfig.makeCookies({});
+apiConfig.makeParams({ id: '123', username: 'john_doe' });
+apiConfig.makeHeaders({ 'x-api-key': 'secret-key' });
+apiConfig.makeCookies({ sessionId: 'session-123' });
