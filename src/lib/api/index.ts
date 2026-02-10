@@ -1,23 +1,23 @@
 /**
  * API Configuration Utilities - Main Entry Point
- * 
+ *
  * This package provides type-safe utilities for building OpenAPI/Swagger
  * compatible API configurations with Zod schema validation.
- * 
+ *
  * ## Features
- * 
+ *
  * - **Type-Safe API Definitions**: Create fully typed API endpoint configurations
  * - **OpenAPI Compatible**: Generate OpenAPI 3.0 and Swagger 2.0 documentation
  * - **HTTP Client Adapters**: Convert configurations for Axios, Fetch, Alova, etc.
  * - **Request/Response Validation**: Use Zod schemas for runtime validation
  * - **Path Parameter Handling**: Support both Express (:param) and OpenAPI ({param}) syntax
- * 
+ *
  * ## Modules
- * 
+ *
  * - **v4**: Main API configuration factory and response utilities
  * - **schemas**: Zod schemas and TypeScript types for OpenAPI components
  * - **adapters**: HTTP client adapter conversions and content type handling
- * 
+ *
  * @example
  * ```typescript
  * import { v4, schemas, adapters } from 'api-config-utils';
@@ -75,7 +75,7 @@
  *   'multipart/form-data'
  * );
  * ```
- * 
+ *
  * @packageDocumentation
  */
 

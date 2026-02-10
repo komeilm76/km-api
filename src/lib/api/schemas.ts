@@ -2,10 +2,10 @@ import z, { ZodObject, ZodType } from 'zod';
 
 /**
  * OpenAPI/Swagger Schema Definitions
- * 
+ *
  * This module provides Zod schemas and TypeScript types for building
  * type-safe API configurations compatible with OpenAPI 3.0 and Swagger 2.0.
- * 
+ *
  * All schemas follow OpenAPI specifications:
  * - OpenAPI 3.0: https://swagger.io/specification/
  * - Swagger 2.0: https://swagger.io/docs/specification/2-0/
@@ -17,11 +17,11 @@ import z, { ZodObject, ZodType } from 'zod';
 
 /**
  * Response Content Type Schema
- * 
+ *
  * Defines valid MIME types for API responses based on OpenAPI/Swagger
  * Media Type specifications. These content types indicate the format
  * of data returned by API endpoints.
- * 
+ *
  * Categories:
  * - Application types: JSON, XML, PDF, ZIP, binary, etc.
  * - Microsoft Office formats: Excel, Word, PowerPoint
@@ -180,7 +180,7 @@ const responseContentTypeSchema = z.enum([
 
 /**
  * Response Content Type
- * 
+ *
  * TypeScript type for valid response content types.
  * Extracted from responseContentTypeSchema.
  *
@@ -188,7 +188,7 @@ const responseContentTypeSchema = z.enum([
  * ```typescript
  * const jsonType: IResponseContentType = 'application/json';
  * const pdfType: IResponseContentType = 'application/pdf';
- * 
+ *
  * function handleResponse(contentType: IResponseContentType) {
  *   if (contentType === 'application/json') {
  *     // Handle JSON
@@ -202,11 +202,11 @@ type IResponseContentType = z.infer<typeof responseContentTypeSchema>;
 
 /**
  * Request Content Type Schema
- * 
+ *
  * Defines valid MIME types for API request bodies based on OpenAPI/Swagger
  * Request Body specifications. These content types indicate the format
  * of data sent to API endpoints.
- * 
+ *
  * Categories:
  * - Application types: JSON, XML, form data, binary uploads
  * - Text types: Plain text, HTML, CSV, Markdown, YAML
@@ -317,7 +317,7 @@ const requestContentTypeSchema = z.enum([
 
 /**
  * Request Content Type
- * 
+ *
  * TypeScript type for valid request content types.
  * Extracted from requestContentTypeSchema.
  *
@@ -325,7 +325,7 @@ const requestContentTypeSchema = z.enum([
  * ```typescript
  * const jsonType: IRequestContentType = 'application/json';
  * const formType: IRequestContentType = 'multipart/form-data';
- * 
+ *
  * function prepareRequest(contentType: IRequestContentType, data: any) {
  *   if (contentType === 'application/json') {
  *     return JSON.stringify(data);
@@ -345,11 +345,11 @@ type IRequestContentType = z.infer<typeof requestContentTypeSchema>;
 
 /**
  * HTTP Method Schema
- * 
+ *
  * Defines valid HTTP methods for API operations based on OpenAPI 3.0
  * and Swagger 2.0 specifications. Supports multiple case variations
  * (lowercase, UPPERCASE, Capitalized) for flexibility.
- * 
+ *
  * Supported methods:
  * - GET: Retrieve resources
  * - POST: Create resources
@@ -408,7 +408,7 @@ const methodSchema = z.enum([
 
 /**
  * HTTP Method Type
- * 
+ *
  * TypeScript type for valid HTTP methods with case variations.
  * Extracted from methodSchema.
  *
@@ -417,7 +417,7 @@ const methodSchema = z.enum([
  * const getMethod: IMethod = 'GET';
  * const postMethod: IMethod = 'post';
  * const patchMethod: IMethod = 'Patch';
- * 
+ *
  * function makeRequest(method: IMethod, url: string) {
  *   fetch(url, { method: method.toUpperCase() });
  * }
@@ -431,14 +431,14 @@ type IMethod = z.infer<typeof methodSchema>;
 
 /**
  * Authentication Status Schema
- * 
+ *
  * Indicates whether an API endpoint requires authentication.
  * Simplified boolean indicator based on OpenAPI security schemes.
- * 
+ *
  * In OpenAPI, actual authentication details are defined in:
  * - Security Schemes (apiKey, http, oauth2, openIdConnect)
  * - Security Requirements at operation level
- * 
+ *
  * This schema provides a simple YES/NO flag for basic auth requirement.
  *
  * @reference https://swagger.io/specification/#security-scheme-object
@@ -464,7 +464,7 @@ const authStatusSchema = z.enum(['YES', 'NO'] as const);
 
 /**
  * Authentication Status Type
- * 
+ *
  * TypeScript type for authentication requirement status.
  * Extracted from authStatusSchema.
  *
@@ -472,7 +472,7 @@ const authStatusSchema = z.enum(['YES', 'NO'] as const);
  * ```typescript
  * const requiresAuth: IAuthStatus = 'YES';
  * const publicEndpoint: IAuthStatus = 'NO';
- * 
+ *
  * function checkAuth(status: IAuthStatus) {
  *   if (status === 'YES') {
  *     // Verify authentication token
@@ -484,7 +484,7 @@ type IAuthStatus = z.infer<typeof authStatusSchema>;
 
 /**
  * Disable Status Schema
- * 
+ *
  * Custom extension for marking endpoints as disabled or deprecated.
  * Not part of the official OpenAPI specification, but useful for
  * internal API management and gradual deprecation.
@@ -511,7 +511,7 @@ const disableStatusSchema = z.enum(['YES', 'NO'] as const);
 
 /**
  * Disable Status Type
- * 
+ *
  * TypeScript type for endpoint disable status.
  * Extracted from disableStatusSchema.
  *
@@ -519,7 +519,7 @@ const disableStatusSchema = z.enum(['YES', 'NO'] as const);
  * ```typescript
  * const enabled: IDisableStatus = 'NO';
  * const disabled: IDisableStatus = 'YES';
- * 
+ *
  * function isEndpointActive(status: IDisableStatus) {
  *   return status === 'NO';
  * }
@@ -533,10 +533,10 @@ type IDisableStatus = z.infer<typeof disableStatusSchema>;
 
 /**
  * Path Schema
- * 
+ *
  * Validates API endpoint paths according to OpenAPI specifications.
  * All paths must start with a forward slash (/).
- * 
+ *
  * Can include path parameters in two formats:
  * - Express-style: /users/:id/posts/:postId
  * - OpenAPI-style: /users/{id}/posts/{postId}
@@ -561,7 +561,7 @@ const pathSchema = z.string().startsWith('/');
 
 /**
  * Path Type
- * 
+ *
  * TypeScript type for API endpoint paths.
  * Extracted from pathSchema.
  *
@@ -569,7 +569,7 @@ const pathSchema = z.string().startsWith('/');
  * ```typescript
  * const userPath: IPath = '/users/{id}';
  * const postPath: IPath = '/posts/:postId/comments';
- * 
+ *
  * function buildUrl(path: IPath, params: Record<string, string>) {
  *   let url = path;
  *   Object.entries(params).forEach(([key, value]) => {
@@ -583,11 +583,11 @@ type IPath = z.infer<typeof pathSchema>;
 
 /**
  * Tags Schema
- * 
+ *
  * Defines tags for grouping and categorizing API operations in
  * OpenAPI documentation. Tags help organize endpoints by feature,
  * resource type, or functional area.
- * 
+ *
  * Custom format: tags start with # (not OpenAPI standard, but
  * common practice for grouping).
  *
@@ -614,7 +614,7 @@ const tagsSchema = z.string().startsWith('#').array();
 
 /**
  * Tags Type
- * 
+ *
  * TypeScript type for API operation tags.
  * Extracted from tagsSchema.
  *
@@ -622,7 +622,7 @@ const tagsSchema = z.string().startsWith('#').array();
  * ```typescript
  * const userTags: ITags = ['#users'];
  * const adminTags: ITags = ['#admin', '#users'];
- * 
+ *
  * function filterByTag(endpoints: any[], tag: string) {
  *   return endpoints.filter(e => e.tags?.includes(tag));
  * }
@@ -632,7 +632,7 @@ type ITags = z.infer<typeof tagsSchema>;
 
 /**
  * Description Schema
- * 
+ *
  * Detailed description of an API operation. Used in OpenAPI
  * documentation to provide comprehensive information about
  * what the endpoint does, edge cases, and usage notes.
@@ -660,14 +660,14 @@ const descriptionSchema = z.string();
 
 /**
  * Description Type
- * 
+ *
  * TypeScript type for API operation descriptions.
  * Extracted from descriptionSchema.
  *
  * @example
  * ```typescript
  * const desc: IDescription = 'Retrieves user profile information';
- * 
+ *
  * function generateDocs(summary: string, description: IDescription) {
  *   return `${summary}\n\n${description}`;
  * }
@@ -677,7 +677,7 @@ type IDescription = z.infer<typeof descriptionSchema>;
 
 /**
  * Summary Schema
- * 
+ *
  * Short summary of an API operation (typically 1-2 sentences).
  * Used in OpenAPI documentation as a brief description that
  * appears in API documentation tools and lists.
@@ -702,14 +702,14 @@ const summarySchema = z.string();
 
 /**
  * Summary Type
- * 
+ *
  * TypeScript type for API operation summaries.
  * Extracted from summarySchema.
  *
  * @example
  * ```typescript
  * const summary: ISummary = 'List all users';
- * 
+ *
  * function createMenuItem(summary: ISummary, path: string) {
  *   return { label: summary, href: path };
  * }
@@ -723,7 +723,7 @@ type ISummary = z.infer<typeof summarySchema>;
 
 /**
  * Body Schema
- * 
+ *
  * Validates that request body is defined using a Zod schema.
  * The body schema defines the structure and validation rules
  * for data sent in the request body.
@@ -761,14 +761,14 @@ const bodySchema = z.instanceof(ZodType);
 
 /**
  * Body Type
- * 
+ *
  * TypeScript type for request body schemas.
  * Extracted from bodySchema.
  *
  * @example
  * ```typescript
  * import { z } from 'zod';
- * 
+ *
  * const userBodySchema: IBody = z.object({
  *   name: z.string(),
  *   email: z.string()
@@ -779,7 +779,7 @@ type IBody = z.infer<typeof bodySchema>;
 
 /**
  * Params Schema
- * 
+ *
  * Validates that path parameters are defined using a Zod object schema.
  * Path parameters are variables in the URL path (e.g., {id}, :userId).
  *
@@ -816,14 +816,14 @@ const paramsSchema = z.instanceof(ZodObject);
 
 /**
  * Params Type
- * 
+ *
  * TypeScript type for path parameter schemas.
  * Extracted from paramsSchema.
  *
  * @example
  * ```typescript
  * import { z } from 'zod';
- * 
+ *
  * const pathParams: IParams = z.object({
  *   userId: z.string(),
  *   postId: z.string()
@@ -834,7 +834,7 @@ type IParams = z.infer<typeof paramsSchema>;
 
 /**
  * Query Schema
- * 
+ *
  * Validates that query parameters are defined using a Zod object schema.
  * Query parameters appear after ? in URLs (e.g., ?page=1&limit=10).
  *
@@ -872,14 +872,14 @@ const querySchema = z.instanceof(ZodObject);
 
 /**
  * Query Type
- * 
+ *
  * TypeScript type for query parameter schemas.
  * Extracted from querySchema.
  *
  * @example
  * ```typescript
  * import { z } from 'zod';
- * 
+ *
  * const searchQuery: IQuery = z.object({
  *   q: z.string(),
  *   page: z.number()
@@ -890,7 +890,7 @@ type IQuery = z.infer<typeof querySchema>;
 
 /**
  * Headers Schema
- * 
+ *
  * Validates that custom headers are defined using a Zod object schema.
  * Custom headers can be required by the API (excluding standard headers
  * like Authorization, Content-Type which are handled separately).
@@ -928,14 +928,14 @@ const headersSchema = z.instanceof(ZodObject);
 
 /**
  * Headers Type
- * 
+ *
  * TypeScript type for custom header schemas.
  * Extracted from headersSchema.
  *
  * @example
  * ```typescript
  * import { z } from 'zod';
- * 
+ *
  * const customHeaders: IHeaders = z.object({
  *   'X-API-Key': z.string(),
  *   'X-Request-ID': z.string()
@@ -946,10 +946,10 @@ type IHeaders = z.infer<typeof headersSchema>;
 
 /**
  * Cookies Schema
- * 
+ *
  * Validates that cookie parameters are defined using a Zod object schema.
  * Cookie parameters are sent via the Cookie header.
- * 
+ *
  * Note: Cookie parameters are supported in OpenAPI 3.0 but NOT in Swagger 2.0.
  *
  * Maps to OpenAPI cookie parameters.
@@ -985,14 +985,14 @@ const cookiesSchema = z.instanceof(ZodObject);
 
 /**
  * Cookies Type
- * 
+ *
  * TypeScript type for cookie parameter schemas.
  * Extracted from cookiesSchema.
  *
  * @example
  * ```typescript
  * import { z } from 'zod';
- * 
+ *
  * const sessionCookies: ICookies = z.object({
  *   sessionId: z.string(),
  *   token: z.string()
@@ -1003,7 +1003,7 @@ type ICookies = z.infer<typeof cookiesSchema>;
 
 /**
  * Response Success Schema
- * 
+ *
  * Validates that successful response data (2xx status codes) is defined
  * using a Zod schema. This defines the structure of data returned when
  * the API call succeeds.
@@ -1042,14 +1042,14 @@ const responseSuccessSchema = z.instanceof(ZodType);
 
 /**
  * Response Success Data Type
- * 
+ *
  * TypeScript type for success response schemas.
  * Extracted from responseSuccessSchema.
  *
  * @example
  * ```typescript
  * import { z } from 'zod';
- * 
+ *
  * const successSchema: IResponseSuccessData = z.object({
  *   data: z.any(),
  *   message: z.string()
@@ -1060,7 +1060,7 @@ type IResponseSuccessData = z.infer<typeof responseSuccessSchema>;
 
 /**
  * Response Error Schema
- * 
+ *
  * Validates that error response data (4xx/5xx status codes) is defined
  * using a Zod schema. This defines the structure of data returned when
  * the API call fails.
@@ -1099,14 +1099,14 @@ const responseErrorSchema = z.instanceof(ZodType);
 
 /**
  * Response Error Data Type
- * 
+ *
  * TypeScript type for error response schemas.
  * Extracted from responseErrorSchema.
  *
  * @example
  * ```typescript
  * import { z } from 'zod';
- * 
+ *
  * const errorSchema: IResponseErrorData = z.object({
  *   error: z.string(),
  *   code: z.number()
@@ -1121,11 +1121,11 @@ type IResponseErrorData = z.infer<typeof responseErrorSchema>;
 
 /**
  * API Configuration Entry Type
- * 
+ *
  * Complete type definition for a single API endpoint configuration.
  * Maps to OpenAPI Operation Object and includes all necessary fields
  * for defining a fully documented, type-safe API endpoint.
- * 
+ *
  * This type combines:
  * - HTTP method and path
  * - Request parameters (body, path params, query, headers, cookies)
@@ -1254,7 +1254,7 @@ type IMakeApiConfigEntry<
 
 /**
  * HTTP Status Code Constants
- * 
+ *
  * Standard HTTP status codes organized by category:
  * - 2xx: Success responses
  * - 3xx: Redirection responses
@@ -1277,7 +1277,7 @@ const httpStatusCodes = [
 
 /**
  * HTTP Status Code Schema
- * 
+ *
  * Validates HTTP status codes used in OpenAPI responses object.
  * Includes all standard status codes from 2xx to 5xx ranges.
  *
@@ -1359,7 +1359,7 @@ const httpStatusCodeSchema = z.union([
 
 /**
  * HTTP Status Code Type
- * 
+ *
  * TypeScript type for valid HTTP status codes.
  * Extracted from httpStatusCodeSchema.
  *
@@ -1367,7 +1367,7 @@ const httpStatusCodeSchema = z.union([
  * ```typescript
  * const successCode: IHttpStatusCode = 200;
  * const notFoundCode: IHttpStatusCode = 404;
- * 
+ *
  * function handleResponse(status: IHttpStatusCode, data: any) {
  *   if (status >= 200 && status < 300) {
  *     // Success
