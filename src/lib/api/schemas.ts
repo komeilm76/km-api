@@ -1251,7 +1251,9 @@ type IMakeApiConfigEntry<
   // OpenAPI: responses object
   response: {
     // OpenAPI: 2xx response schema
-    [statusCode in IHttpStatusCode]?: RESPONSE_SUCCESS_DATA | RESPONSE_ERROR_DATA;
+    [statusCode in IHttpStatusCode | `${IHttpStatusCode}`]?:
+      | RESPONSE_SUCCESS_DATA
+      | RESPONSE_ERROR_DATA;
     // OpenAPI: 4xx/5xx response schema
     // error: RESPONSE_ERROR_DATA;
   };
