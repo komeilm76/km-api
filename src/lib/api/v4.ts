@@ -147,70 +147,6 @@ const makeApiConfig = <
   };
 
   /**
-   * Create type-safe success response
-   *
-   * Validates and returns a properly typed success response that matches
-   * the configured success schema.
-   *
-   * @template DATA - Success response type inferred from schema
-   * @param data - The success response data
-   * @returns Type-safe success response
-   *
-   * @example
-   * ```typescript
-   * const getUserConfig = makeApiConfig({
-   *   method: 'GET',
-   *   pathShape: '/users/{id}',
-   *   response: {
-   *     success: z.object({ id: z.string(), name: z.string() }),
-   *     error: z.object({ message: z.string() })
-   *   },
-   *   // ... other config
-   * });
-   *
-   * const response = getUserConfig.makeSuccessResponse({
-   *   id: '123',
-   *   name: 'John Doe'
-   * });
-   * ```
-   */
-  const makeSuccessResponse = <DATA extends z.infer<CONFIG['response']['success']>>(data: DATA) => {
-    return data;
-  };
-
-  /**
-   * Create type-safe error response
-   *
-   * Validates and returns a properly typed error response that matches
-   * the configured error schema.
-   *
-   * @template DATA - Error response type inferred from schema
-   * @param data - The error response data
-   * @returns Type-safe error response
-   *
-   * @example
-   * ```typescript
-   * const getUserConfig = makeApiConfig({
-   *   method: 'GET',
-   *   pathShape: '/users/{id}',
-   *   response: {
-   *     success: z.object({ id: z.string(), name: z.string() }),
-   *     error: z.object({ code: z.number(), message: z.string() })
-   *   },
-   *   // ... other config
-   * });
-   *
-   * const errorResponse = getUserConfig.makeErrorResponse({
-   *   code: 404,
-   *   message: 'User not found'
-   * });
-   * ```
-   */
-  const makeErrorResponse = <DATA extends z.infer<CONFIG['response']['error']>>(data: DATA) => {
-    return data;
-  };
-
-  /**
    * Create type-safe query parameters
    *
    * Validates and returns properly typed query parameters that match
@@ -477,8 +413,6 @@ const makeApiConfig = <
     makeFullPath,
     makeOpenAPIPath,
     makeBody,
-    makeSuccessResponse,
-    makeErrorResponse,
     makeQueries,
     makeParams,
     makeHeaders,

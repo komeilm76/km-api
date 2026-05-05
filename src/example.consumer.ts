@@ -13,7 +13,7 @@ const errorSchema = z.object({
   message: z.string(),
 });
 
-const apiConfig = kmApi.v4.makeApiConfig({
+const apiConfig = kmApi.apiConfig.makeApiConfig({
   method: 'get',
   pathShape: '/users/:id/gholi/:username',
   tags: ['#users'],
@@ -38,14 +38,26 @@ const apiConfig = kmApi.v4.makeApiConfig({
     }),
   },
   response: {
-    success: z.object({
+    '200': z.object({
       id: z.string(),
       name: z.string(),
       email: z.string(),
     }),
-    error: z.object({
-      code: z.number(),
-      message: z.string(),
+    '400': z.object({
+      code1: z.number(),
+      message2: z.string(),
+    }),
+    '401': z.object({
+      code2: z.number(),
+      message2: z.string(),
+    }),
+    '402': z.object({
+      code3: z.number(),
+      message3: z.string(),
+    }),
+    '403': z.object({
+      code4: z.number(),
+      message4: z.string(),
     }),
   },
 });

@@ -53,7 +53,7 @@ import { v4, schemas } from 'km-api';
 import { z } from 'zod';
 
 // Define your API endpoint
-const getUserApi = v4.makeApiConfig({
+const getUserApi = apiConfig.makeApiConfig({
   method: 'GET',
   pathShape: '/users/{id}',
   tags: ['#users'],
@@ -99,13 +99,13 @@ km-api supports both Express-style and OpenAPI-style path parameters:
 
 ```typescript
 // Express-style (colon syntax)
-const config1 = v4.makeApiConfig({
+const config1 = apiConfig.makeApiConfig({
   pathShape: '/users/:userId/posts/:postId',
   // ...
 });
 
 // OpenAPI-style (curly braces)
-const config2 = v4.makeApiConfig({
+const config2 = apiConfig.makeApiConfig({
   pathShape: '/users/{userId}/posts/{postId}',
   // ...
 });
@@ -123,7 +123,7 @@ const path = config1.makeFullPath({ userId: '123', postId: '456' });
 import { v4 } from 'km-api';
 import { z } from 'zod';
 
-const listUsersApi = v4.makeApiConfig({
+const listUsersApi = apiConfig.makeApiConfig({
   method: 'GET',
   pathShape: '/users',
   tags: ['#users'],
@@ -143,14 +143,14 @@ const listUsersApi = v4.makeApiConfig({
     cookies: z.object({})
   },
   response: {
-    success: v4.makeResponseSuccessShape(
+    success: apiConfig.makeResponseSuccessShape(
       z.object({
         id: z.string(),
         name: z.string(),
         email: z.string(),
       }),
       'users'
-    ).list(v4.paginationSchema()),
+    ).list(apiConfig.paginationSchema()),
     error: z.object({
       message: z.string(),
       code: z.number(),
@@ -165,7 +165,7 @@ const queries = listUsersApi.makeQueries({ page: 1, limit: 20, search: 'john' })
 #### POST Request with Body
 
 ```typescript
-const createUserApi = v4.makeApiConfig({
+const createUserApi = apiConfig.makeApiConfig({
   method: 'POST',
   pathShape: '/users',
   tags: ['#users', '#admin'],
@@ -217,7 +217,7 @@ const body = createUserApi.makeBody({
 #### PUT/PATCH Request with Path Parameters
 
 ```typescript
-const updatePostApi = v4.makeApiConfig({
+const updatePostApi = apiConfig.makeApiConfig({
   method: 'PUT',
   pathShape: '/users/{userId}/posts/{postId}',
   tags: ['#posts'],
@@ -267,7 +267,7 @@ const path = updatePostApi.makeFullPath(params);
 #### DELETE Request
 
 ```typescript
-const deleteUserApi = v4.makeApiConfig({
+const deleteUserApi = apiConfig.makeApiConfig({
   method: 'DELETE',
   pathShape: '/users/{id}',
   tags: ['#users', '#admin'],
@@ -309,7 +309,7 @@ const userSchema = z.object({
 });
 
 // Create response wrapper
-const userResponse = v4.makeResponseSuccessShape(userSchema, 'user');
+const userResponse = apiConfig.makeResponseSuccessShape(userSchema, 'user');
 
 // Single item
 const singleItemSchema = userResponse.item();
@@ -327,8 +327,8 @@ const productSchema = z.object({
 });
 
 // List with pagination
-const productListSchema = v4.makeResponseSuccessShape(productSchema, 'products')
-  .list(v4.paginationSchema());
+const productListSchema = apiConfig.makeResponseSuccessShape(productSchema, 'products')
+  .list(apiConfig.paginationSchema());
 
 // Validates:
 // {
@@ -350,7 +350,7 @@ const customPagination = z.object({
   hasMore: z.boolean(),
 });
 
-const listSchema = v4.makeResponseSuccessShape(userSchema, 'users')
+const listSchema = apiConfig.makeResponseSuccessShape(userSchema, 'users')
   .list(customPagination);
 ```
 
@@ -359,7 +359,7 @@ const listSchema = v4.makeResponseSuccessShape(userSchema, 'users')
 Convert response content types to adapter-specific configurations:
 
 ```typescript
-const config = v4.makeApiConfig({
+const config = apiConfig.makeApiConfig({
   responseContentType: 'application/json',
   // ...
 });
@@ -388,7 +388,7 @@ const alovaTaroConfig = config.convertResponseType('alova-taro');
 #### PDF Download Example
 
 ```typescript
-const downloadPdfApi = v4.makeApiConfig({
+const downloadPdfApi = apiConfig.makeApiConfig({
   method: 'GET',
   pathShape: '/reports/{id}/download',
   responseContentType: 'application/pdf',
@@ -438,7 +438,7 @@ const safeBody = adapters.safeConvertRequestBody(
 ### File Upload Example
 
 ```typescript
-const uploadFileApi = v4.makeApiConfig({
+const uploadFileApi = apiConfig.makeApiConfig({
   method: 'POST',
   pathShape: '/upload',
   tags: ['#files'],
@@ -479,7 +479,7 @@ const headers = uploadFileApi.makeHeaders({ 'X-Upload-Token': 'token123' });
 ### Authentication & Headers
 
 ```typescript
-const protectedApi = v4.makeApiConfig({
+const protectedApi = apiConfig.makeApiConfig({
   method: 'GET',
   pathShape: '/admin/users',
   auth: 'YES', // Indicates authentication required
@@ -502,7 +502,7 @@ const headers = protectedApi.makeHeaders({
 ### Cookies Support
 
 ```typescript
-const sessionApi = v4.makeApiConfig({
+const sessionApi = apiConfig.makeApiConfig({
   method: 'GET',
   pathShape: '/profile',
   request: {
@@ -524,7 +524,7 @@ const cookies = sessionApi.makeCookies({
 ### Disabling Endpoints
 
 ```typescript
-const deprecatedApi = v4.makeApiConfig({
+const deprecatedApi = apiConfig.makeApiConfig({
   method: 'GET',
   pathShape: '/old-endpoint',
   disable: 'YES', // Mark as disabled/deprecated
@@ -602,8 +602,6 @@ Common request types include:
 | `makeQueries(queries)` | `queries: T` | `T` | Type-safe query parameters |
 | `makeHeaders(headers)` | `headers: T` | `T` | Type-safe headers |
 | `makeCookies(cookies)` | `cookies: T` | `T` | Type-safe cookies |
-| `makeSuccessResponse(data)` | `data: T` | `T` | Type-safe success response |
-| `makeErrorResponse(data)` | `data: T` | `T` | Type-safe error response |
 
 ### Path Helpers
 
@@ -657,7 +655,7 @@ const authorSchema = z.object({
 });
 
 // List posts
-const listPostsApi = v4.makeApiConfig({
+const listPostsApi = apiConfig.makeApiConfig({
   method: 'GET',
   pathShape: '/posts',
   tags: ['#posts'],
@@ -676,14 +674,14 @@ const listPostsApi = v4.makeApiConfig({
     cookies: z.object({})
   },
   response: {
-    success: v4.makeResponseSuccessShape(postSchema, 'posts')
-      .list(v4.paginationSchema()),
+    success: apiConfig.makeResponseSuccessShape(postSchema, 'posts')
+      .list(apiConfig.paginationSchema()),
     error: z.object({ message: z.string() }),
   },
 });
 
 // Get single post
-const getPostApi = v4.makeApiConfig({
+const getPostApi = apiConfig.makeApiConfig({
   method: 'GET',
   pathShape: '/posts/{id}',
   tags: ['#posts'],
@@ -698,7 +696,7 @@ const getPostApi = v4.makeApiConfig({
     cookies: z.object({})
   },
   response: {
-    success: v4.makeResponseSuccessShape(
+    success: apiConfig.makeResponseSuccessShape(
       postSchema.extend({ author: authorSchema.optional() }),
       'post'
     ).item(),
@@ -707,7 +705,7 @@ const getPostApi = v4.makeApiConfig({
 });
 
 // Create post
-const createPostApi = v4.makeApiConfig({
+const createPostApi = apiConfig.makeApiConfig({
   method: 'POST',
   pathShape: '/posts',
   tags: ['#posts'],
@@ -729,7 +727,7 @@ const createPostApi = v4.makeApiConfig({
     cookies: z.object({})
   },
   response: {
-    success: v4.makeResponseSuccessShape(postSchema, 'post').item(),
+    success: apiConfig.makeResponseSuccessShape(postSchema, 'post').item(),
     error: z.object({
       message: z.string(),
       errors: z.array(z.object({
@@ -778,7 +776,7 @@ async function example() {
 
 ```typescript
 // Custom wrapper key
-const customResponse = v4.makeResponseSuccessShape(userSchema, 'userData');
+const customResponse = apiConfig.makeResponseSuccessShape(userSchema, 'userData');
 
 // Single item
 const item = customResponse.item();
@@ -797,7 +795,7 @@ const list = customResponse.list(z.object({
 ### OpenAPI Documentation Generation
 
 ```typescript
-const api = v4.makeApiConfig({
+const api = apiConfig.makeApiConfig({
   method: 'GET',
   pathShape: '/users/:id',
   summary: 'Get user',
@@ -832,7 +830,7 @@ const openApiSpec = {
 import express from 'express';
 import { v4 } from 'km-api';
 
-const getUserApi = v4.makeApiConfig({
+const getUserApi = apiConfig.makeApiConfig({
   // ... configuration
 });
 
@@ -849,18 +847,11 @@ app.get('/users/:id', async (req, res) => {
     
     // Your logic here
     const user = await db.users.findById(params.id);
-    
-    // Validate response
-    const response = getUserApi.makeSuccessResponse(user);
-    
-    res.json(response);
+        
+    res.json(user);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const errorResponse = getUserApi.makeErrorResponse({
-        message: 'Validation error',
-        errors: error.errors,
-      });
-      res.status(400).json(errorResponse);
+      res.status(400).json(error);
     }
   }
 });
@@ -874,7 +865,7 @@ import { v4 } from 'km-api';
 import { z } from 'zod';
 
 describe('User API', () => {
-  const getUserApi = v4.makeApiConfig({
+  const getUserApi = apiConfig.makeApiConfig({
     method: 'GET',
     pathShape: '/users/{id}',
     request: {
@@ -911,7 +902,7 @@ describe('User API', () => {
 km-api/
 ├── src/
 │   ├── index.ts          # Main entry point
-│   ├── v4.ts             # API configuration factory
+│   ├── apiConfig.ts             # API configuration factory
 │   ├── schemas.ts        # Zod schemas and types
 │   └── adapters.ts       # HTTP client adapters
 ├── build/

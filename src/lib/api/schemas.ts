@@ -1,5 +1,10 @@
 import z, { ZodObject, ZodType } from 'zod';
 
+type StatusRange = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+type SuccessStatusCode = `${2 | 3 | 4 | 5}${StatusRange}${StatusRange}`;
+type ErrorStatusCode = `${4 | 5}${StatusRange}${StatusRange}`;
+type StatusCode = SuccessStatusCode | ErrorStatusCode;
+
 /**
  * OpenAPI/Swagger Schema Definitions
  *
@@ -1239,12 +1244,21 @@ type IMakeApiConfigEntry<
     // OpenAPI 3.0: cookie parameters (not in Swagger 2.0)
     cookies: COOKIES;
   };
+  // // OpenAPI: responses object
+  // response: {
+  //   // OpenAPI: 2xx response schema
+  //   success: RESPONSE_SUCCESS_DATA;
+  //   // OpenAPI: 4xx/5xx response schema
+  //   error: RESPONSE_ERROR_DATA;
+  // };
+
+  // #new
   // OpenAPI: responses object
   response: {
     // OpenAPI: 2xx response schema
-    success: RESPONSE_SUCCESS_DATA;
+    [statusCode in StatusCode]?: RESPONSE_SUCCESS_DATA | RESPONSE_ERROR_DATA;
     // OpenAPI: 4xx/5xx response schema
-    error: RESPONSE_ERROR_DATA;
+    // error: RESPONSE_ERROR_DATA;
   };
 };
 
