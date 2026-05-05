@@ -1,10 +1,5 @@
 import z, { ZodObject, ZodType } from 'zod';
 
-type StatusRange = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
-type SuccessStatusCode = `${2 | 3 | 4 | 5}${StatusRange}${StatusRange}`;
-type ErrorStatusCode = `${4 | 5}${StatusRange}${StatusRange}`;
-type StatusCode = SuccessStatusCode | ErrorStatusCode;
-
 /**
  * OpenAPI/Swagger Schema Definitions
  *
@@ -1256,7 +1251,7 @@ type IMakeApiConfigEntry<
   // OpenAPI: responses object
   response: {
     // OpenAPI: 2xx response schema
-    [statusCode in StatusCode]?: RESPONSE_SUCCESS_DATA | RESPONSE_ERROR_DATA;
+    [statusCode in IHttpStatusCode]?: RESPONSE_SUCCESS_DATA | RESPONSE_ERROR_DATA;
     // OpenAPI: 4xx/5xx response schema
     // error: RESPONSE_ERROR_DATA;
   };
@@ -1277,16 +1272,22 @@ type IMakeApiConfigEntry<
  *
  * @reference https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
  */
-const httpStatusCodes = [
-  // 2xx Success
-  200, 201, 202, 203, 204, 205, 206,
-  // 3xx Redirection
-  300, 301, 302, 303, 304, 307, 308,
-  // 4xx Client Errors
+const successStatusCodes = [200, 201, 202, 203, 204, 205, 206] as const;
+const redirectionStatusCodes = [300, 301, 302, 303, 304, 307, 308] as const;
+const clientErrorStatusCodes = [
   400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 418,
   422, 423, 424, 425, 426, 428, 429, 431, 451,
+] as const;
+const serverErrorStatusCodes = [500, 501, 502, 503, 504, 505, 506, 507, 508, 510, 511] as const;
+const httpStatusCodes = [
+  // 2xx Success
+  ...successStatusCodes,
+  // 3xx Redirection
+  ...redirectionStatusCodes,
+  // 4xx Client Errors
+  ...clientErrorStatusCodes,
   // 5xx Server Errors
-  500, 501, 502, 503, 504, 505, 506, 507, 508, 510, 511,
+  ...serverErrorStatusCodes,
 ] as const;
 
 /**
@@ -1438,4 +1439,9 @@ export {
   responseSuccessSchema,
   responseErrorSchema,
   httpStatusCodeSchema,
+  successStatusCodes,
+  redirectionStatusCodes,
+  clientErrorStatusCodes,
+  serverErrorStatusCodes,
+  httpStatusCodes,
 };
