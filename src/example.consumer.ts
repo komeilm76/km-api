@@ -65,8 +65,6 @@ const apiConfig = kmApi.apiConfig.makeApiConfig({
 // Exercise helpers so their types are validated
 apiConfig.makeOpenAPIPath();
 apiConfig.makeBody({ age: 12, name: 'john' });
-apiConfig.makeSuccessResponse({ id: '123', name: 'john', email: 'john@example.com' });
-apiConfig.makeErrorResponse({ code: 404, message: 'User not found' });
 apiConfig.makeQueries({});
 apiConfig.makeParams({ id: '123', username: 'john_doe' });
 apiConfig.makeHeaders({ 'x-api-key': 'secret-key' });
