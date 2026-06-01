@@ -1,986 +1,597 @@
-# 🚀 km-api
+# km-api
 
 [![npm version](https://img.shields.io/npm/v/km-api.svg)](https://www.npmjs.com/package/km-api)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9+-blue.svg)](https://www.typescriptlang.org/)
-[![Zod](https://img.shields.io/badge/Zod-3.25+-purple.svg)](https://zod.dev/)
+[![Zod](https://img.shields.io/badge/Zod-4.x-purple.svg)](https://zod.dev/)
 
-A powerful TypeScript package that provides **IntelliSense** and **type-safe validation** for APIs using Zod schemas. Build robust, self-documenting API configurations with full OpenAPI/Swagger compatibility.
+Type-safe API schema builder for TypeScript. Define HTTP endpoints with Zod validation, full OpenAPI 3.0 compatibility, and adapters for Axios, Fetch, and Alova.
 
-## ✨ Features
+## Features
 
-- 🔒 **Type-safe API configurations** with full IntelliSense support
-- ✅ **Automatic validation** using Zod schemas
-- 🎯 **Dual path syntax support** - Express (`:param`) and OpenAPI (`{param}`)
-- 📊 **Response shape builders** for consistent API responses
-- 🔐 **Authentication support** built-in
-- 🔄 **HTTP client adapters** for Axios, Fetch, Alova, and more
-- 📝 **Self-documenting** API configurations
-- 🌐 **OpenAPI/Swagger compatible** - generate documentation from configs
-- 🛠️ **Helper methods** for common API tasks
+- **Type-safe API definitions** — full IntelliSense for every field
+- **OpenAPI 3.0 compatible** — path, methods, parameters, responses, examples
+- **Dual path syntax** — Express `:param` and OpenAPI `{param}` both work
+- **Zod schema validation** — runtime-safe request and response data
+- **HTTP client adapters** — Axios, Fetch, Alova (UniApp, XHR, Taro)
+- **Request body conversion** — auto-converts JSON, form-data, multipart, binary
+- **Response shape builders** — standardised single-item and paginated-list wrappers
+- **OpenAPI examples** — optional per-endpoint request/response examples
 
-## 📦 Installation
-
-```bash
-npm install km-api
-```
+## Installation
 
 ```bash
-yarn add km-api
+npm install km-api zod
+# or
+yarn add km-api zod
+# or
+pnpm add km-api zod
+# or
+bun add km-api zod
 ```
 
-```bash
-pnpm add km-api
-```
+## Compatibility
 
-```bash
-bun add km-api
-```
+| km-api  | TypeScript | Zod  | Node.js |
+|---------|------------|------|---------|
+| 0.3.x   | 5.9+       | 4.x  | 14+     |
+| 0.2.x   | 5.9+       | 4.x  | 14+     |
+| 0.1.x   | 5.x        | 3.x  | 14+     |
 
-## ⚠️ Version Compatibility
+---
 
-| km-api Version | TypeScript | Zod | Node.js |
-|----------------|------------|-----|---------|
-| 0.1.0+         | 5.9+       | 3.25+ | 14+   |
-| 0.0.7 and below| 4.x        | 3.x | 14+   |
-
-> **Current Version:** 0.1.14 requires TypeScript 5.9+ and Zod 3.25+
-
-## 🎯 Quick Start
+## Quick Start
 
 ```typescript
-import { v4, schemas } from 'km-api';
 import { z } from 'zod';
+import { makeApiConfig } from 'km-api';
 
-// Define your API endpoint
-const getUserApi = apiConfig.makeApiConfig({
+const getUser = makeApiConfig({
   method: 'GET',
   pathShape: '/users/{id}',
   tags: ['#users'],
   auth: 'YES',
   responseContentType: 'application/json',
   summary: 'Get user by ID',
-  description: 'Retrieves a user by their unique identifier',
+  description: 'Retrieves a single user by their unique identifier.',
   request: {
     body: z.any(),
-    params: z.object({
-      id: z.string().uuid(),
-    }),
-    query: z.object({
-      include: z.enum(['profile', 'settings']).optional(),
-    }),
-    headers: z.object({}),
-    cookies: z.object({})
+    params: z.object({ id: z.string().uuid() }),
+    query: z.object({ include: z.enum(['profile', 'settings']).optional() }),
+    headers: z.object({ 'x-api-key': z.string().optional() }),
+    cookies: z.object({ sessionId: z.string().optional() }),
   },
   response: {
-    success: z.object({
-      id: z.string(),
-      name: z.string(),
-      email: z.string().email(),
-    }),
-    error: z.object({
-      message: z.string(),
-      code: z.number(),
-    }),
+    200: z.object({ id: z.string(), name: z.string(), email: z.string() }),
+    404: z.object({ message: z.string() }),
   },
 });
 
-// Use helper methods
-const params = getUserApi.makeParams({ id: '123e4567-e89b-12d3-a456-426614174000' });
-const fullPath = getUserApi.makeFullPath(params);
-// Result: "/users/123e4567-e89b-12d3-a456-426614174000"
+// Resolve path
+getUser.makeFullPath({ id: '550e8400-e29b-41d4-a716-446655440000' });
+// → '/users/550e8400-e29b-41d4-a716-446655440000'
+
+// OpenAPI path format
+getUser.makeOpenAPIPath();
+// → '/users/{id}'
+
+// HTTP client adapter config
+getUser.convertResponseType('axios');   // { responseType: 'json' }
+getUser.convertResponseType('fetch');   // { responseMethod: 'json' }
 ```
 
-## 📚 Documentation
+---
 
-### Path Syntax Support
+## API Reference
 
-km-api supports both Express-style and OpenAPI-style path parameters:
+### `makeApiConfig(config)`
+
+Creates a typed endpoint configuration with helper methods attached.
+
+#### Configuration fields
+
+| Field                | Type                       | Required | Description |
+|----------------------|----------------------------|----------|-------------|
+| `method`             | `IMethod`                  | ✅       | HTTP method (case-insensitive) |
+| `pathShape`          | `IPath`                    | ✅       | Path starting with `/` |
+| `request.body`       | `ZodType`                  | ✅       | Request body Zod schema |
+| `request.params`     | `ZodObject`                | ✅       | Path parameters Zod schema |
+| `request.query`      | `ZodObject`                | ✅       | Query parameters Zod schema |
+| `request.headers`    | `ZodObject`                | ✅       | Custom headers Zod schema |
+| `request.cookies`    | `ZodObject`                | ✅       | Cookie parameters Zod schema |
+| `response`           | `Record<statusCode, ZodType>` | ✅    | Response schemas keyed by status code |
+| `tags`               | `string[]`                 | –        | Tags prefixed with `#` |
+| `auth`               | `'YES' \| 'NO'`            | –        | Authentication requirement |
+| `responseContentType`| `IResponseContentType`     | –        | Response MIME type |
+| `requestContentType` | `IRequestContentType`      | –        | Request body MIME type |
+| `disable`            | `'YES' \| 'NO'`            | –        | Mark endpoint as disabled |
+| `summary`            | `string`                   | –        | Short summary (1–2 sentences) |
+| `description`        | `string`                   | –        | Detailed description (Markdown) |
+| `examples`           | `IEndpointExamples`        | –        | OpenAPI 3.0 examples for docs |
+
+#### Returned helper methods
+
+| Method | Signature | Description |
+|--------|-----------|-------------|
+| `makeBody` | `(data) => data` | Returns type-safe request body |
+| `makeParams` | `(params) => params` | Returns type-safe path parameters |
+| `makeQueries` | `(queries) => queries` | Returns type-safe query parameters |
+| `makeHeaders` | `(headers) => headers` | Returns type-safe headers |
+| `makeCookies` | `(cookies) => cookies` | Returns type-safe cookies |
+| `makeFullPath` | `(params) => string` | Resolves the path template to a URL |
+| `makeOpenAPIPath` | `() => string` | Converts path to OpenAPI `{param}` format |
+| `convertResponseType` | `(adapter) => AdapterConfig` | Returns adapter-specific response config |
+
+---
+
+### Path syntax
+
+Both path parameter styles are supported and can be mixed:
 
 ```typescript
-// Express-style (colon syntax)
-const config1 = apiConfig.makeApiConfig({
-  pathShape: '/users/:userId/posts/:postId',
-  // ...
-});
+// Express-style
+pathShape: '/users/:id/posts/:postId'
 
-// OpenAPI-style (curly braces)
-const config2 = apiConfig.makeApiConfig({
-  pathShape: '/users/{userId}/posts/{postId}',
-  // ...
-});
+// OpenAPI-style
+pathShape: '/users/{id}/posts/{postId}'
 
-// Both work the same way
-const path = config1.makeFullPath({ userId: '123', postId: '456' });
-// Result: "/users/123/posts/456"
+// Mixed (valid)
+pathShape: '/users/:id/posts/{postId}'
 ```
 
-### Creating API Configurations
-
-#### GET Request
-
 ```typescript
-import { v4 } from 'km-api';
-import { z } from 'zod';
-
-const listUsersApi = apiConfig.makeApiConfig({
-  method: 'GET',
-  pathShape: '/users',
-  tags: ['#users'],
-  auth: 'YES',
-  responseContentType: 'application/json',
-  summary: 'List all users',
-  description: 'Returns a paginated list of users',
-  request: {
-    body: z.any(),
-    params: z.object({}),
-    query: z.object({
-      page: z.number().int().min(1).default(1),
-      limit: z.number().int().min(1).max(100).default(20),
-      search: z.string().optional(),
-    }),
-    headers: z.object({}),
-    cookies: z.object({})
-  },
-  response: {
-    success: apiConfig.makeResponseSuccessShape(
-      z.object({
-        id: z.string(),
-        name: z.string(),
-        email: z.string(),
-      }),
-      'users'
-    ).list(apiConfig.paginationSchema()),
-    error: z.object({
-      message: z.string(),
-      code: z.number(),
-    }),
-  },
-});
-
-// Use it
-const queries = listUsersApi.makeQueries({ page: 1, limit: 20, search: 'john' });
+config.makeFullPath({ id: '1', postId: '42' }); // '/users/1/posts/42'
+config.makeOpenAPIPath();                         // '/users/{id}/posts/{postId}'
 ```
 
-#### POST Request with Body
+---
+
+### Response schemas
+
+Map status codes to Zod schemas. Both number and string keys are accepted:
 
 ```typescript
-const createUserApi = apiConfig.makeApiConfig({
-  method: 'POST',
-  pathShape: '/users',
-  tags: ['#users', '#admin'],
-  auth: 'YES',
-  requestContentType: 'application/json',
-  responseContentType: 'application/json',
-  summary: 'Create a new user',
-  description: 'Creates a new user account with validation',
-  request: {
-    body: z.object({
-      name: z.string().min(2).max(100),
-      email: z.string().email(),
-      age: z.number().int().min(18).max(120),
-      role: z.enum(['user', 'admin', 'moderator']).default('user'),
-    }),
-    params: z.object({}),
-    query: z.object({}),
-    headers: z.object({}),
-    cookies: z.object({})
-  },
-  response: {
-    success: z.object({
-      id: z.string().uuid(),
-      name: z.string(),
-      email: z.string(),
-      createdAt: z.string().datetime(),
-    }),
-    error: z.object({
-      message: z.string(),
-      errors: z.array(
-        z.object({
-          field: z.string(),
-          issue: z.string(),
-        })
-      ).optional(),
-    }),
-  },
-});
-
-// Use it
-const body = createUserApi.makeBody({
-  name: 'John Doe',
-  email: 'john@example.com',
-  age: 25,
-  role: 'user',
-});
+response: {
+  200: z.object({ id: z.string(), name: z.string() }),
+  201: z.object({ id: z.string() }),           // alternate success
+  400: z.object({ message: z.string() }),
+  '404': z.object({ message: z.string() }),    // string key also works
+  500: z.object({ error: z.string() }),
+}
 ```
 
-#### PUT/PATCH Request with Path Parameters
+---
+
+### Response shape builders
+
+Use `makeResponseSuccessShape` to create consistent wrappers for item and list responses.
+
+#### Single item
 
 ```typescript
-const updatePostApi = apiConfig.makeApiConfig({
-  method: 'PUT',
-  pathShape: '/users/{userId}/posts/{postId}',
-  tags: ['#posts'],
-  auth: 'YES',
-  requestContentType: 'application/json',
-  responseContentType: 'application/json',
-  summary: 'Update a post',
-  description: 'Updates a specific post for a user',
-  request: {
-    body: z.object({
-      title: z.string().min(1).max(200),
-      content: z.string().min(1),
-      published: z.boolean().optional(),
-    }),
-    params: z.object({
-      userId: z.string().uuid(),
-      postId: z.string().uuid(),
-    }),
-    query: z.object({}),
-    headers: z.object({}),
-    cookies: z.object({})
-  },
-  response: {
-    success: z.object({
-      id: z.string(),
-      title: z.string(),
-      content: z.string(),
-      published: z.boolean(),
-      updatedAt: z.string().datetime(),
-    }),
-    error: z.object({
-      message: z.string(),
-    }),
-  },
-});
+import { makeResponseSuccessShape } from 'km-api';
 
-// Use it
-const params = updatePostApi.makeParams({
-  userId: 'user-123',
-  postId: 'post-456',
-});
+const userSchema = z.object({ id: z.string(), name: z.string() });
 
-const path = updatePostApi.makeFullPath(params);
-// Result: "/users/user-123/posts/post-456"
+const shape = makeResponseSuccessShape(userSchema, 'user');
+const itemSchema = shape.item();
+
+// Validates: { user: { id: '1', name: 'Alice' } }
 ```
 
-#### DELETE Request
+#### Paginated list
 
 ```typescript
-const deleteUserApi = apiConfig.makeApiConfig({
-  method: 'DELETE',
-  pathShape: '/users/{id}',
-  tags: ['#users', '#admin'],
-  auth: 'YES',
-  responseContentType: 'application/json',
-  summary: 'Delete a user',
-  description: 'Permanently deletes a user account',
-  request: {
-    body: z.any(),
-    params: z.object({
-      id: z.string().uuid(),
-    }),
-    query: z.object({}),
-    headers: z.object({}),
-    cookies: z.object({})
-  },
-  response: {
-    success: z.object({
-      message: z.string(),
-      deletedAt: z.string().datetime(),
-    }),
-    error: z.object({
-      message: z.string(),
-      code: z.number(),
-    }),
-  },
-});
-```
+import { makeResponseSuccessShape, paginationSchema } from 'km-api';
 
-### Response Shapes
-
-#### Single Item Response
-
-```typescript
-const userSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  email: z.string(),
-});
-
-// Create response wrapper
-const userResponse = apiConfig.makeResponseSuccessShape(userSchema, 'user');
-
-// Single item
-const singleItemSchema = userResponse.item();
-// Validates: { user: { id, name, email } }
-```
-
-#### List Response with Pagination
-
-```typescript
-const productSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  price: z.number(),
-  category: z.string(),
-});
-
-// List with pagination
-const productListSchema = apiConfig.makeResponseSuccessShape(productSchema, 'products')
-  .list(apiConfig.paginationSchema());
+const listSchema = makeResponseSuccessShape(userSchema, 'users')
+  .list(paginationSchema());
 
 // Validates:
 // {
-//   products: [{ id, name, price, category }, ...],
+//   users: [{ id: '1', name: 'Alice' }, ...],
 //   currentPage: 1,
-//   totalItems: 100,
+//   totalItems: 50,
 //   itemsPerPage: 20,
-//   totalPages: 5
+//   totalPages: 3         (optional)
 // }
 ```
 
-#### Custom Pagination Schema
+#### Custom metadata
 
 ```typescript
-const customPagination = z.object({
-  page: z.number(),
-  perPage: z.number(),
-  total: z.number(),
-  hasMore: z.boolean(),
-});
+const meta = z.object({ page: z.number(), total: z.number(), nextCursor: z.string().optional() });
 
-const listSchema = apiConfig.makeResponseSuccessShape(userSchema, 'users')
-  .list(customPagination);
+const cursorListSchema = makeResponseSuccessShape(userSchema, 'users').list(meta);
 ```
 
-### HTTP Client Adapters
+---
 
-Convert response content types to adapter-specific configurations:
+### HTTP client adapters
+
+#### Response type conversion
 
 ```typescript
-const config = apiConfig.makeApiConfig({
-  responseContentType: 'application/json',
-  // ...
-});
+const config = makeApiConfig({ responseContentType: 'application/pdf', ... });
 
-// For Axios
-const axiosConfig = config.convertResponseType('axios');
-// Returns: { responseType: 'json' }
+// Axios
+config.convertResponseType('axios');        // { responseType: 'blob' }
 
-// For Fetch API
-const fetchConfig = config.convertResponseType('fetch');
-// Returns: { responseMethod: 'json' }
+// Fetch API
+config.convertResponseType('fetch');        // { responseMethod: 'blob' }
 
-// For Alova with Axios adapter
-const alovaAxiosConfig = config.convertResponseType('alova-axios');
-
-// For Alova with UniApp adapter
-const alovaUniAppConfig = config.convertResponseType('alova-uniapp');
-
-// For Alova with XHR adapter
-const alovaXHRConfig = config.convertResponseType('alova-xhr');
-
-// For Alova with Taro adapter
-const alovaTaroConfig = config.convertResponseType('alova-taro');
+// Alova variants
+config.convertResponseType('alova-axios');  // { responseType: 'blob' }
+config.convertResponseType('alova-uniapp'); // { responseType: 'arraybuffer' }
+config.convertResponseType('alova-xhr');    // { responseType: 'blob' }
+config.convertResponseType('alova-taro');   // { responseType: 'arraybuffer', dataType: 'arraybuffer' }
 ```
 
-#### PDF Download Example
+#### Request body conversion
 
 ```typescript
-const downloadPdfApi = apiConfig.makeApiConfig({
-  method: 'GET',
-  pathShape: '/reports/{id}/download',
-  responseContentType: 'application/pdf',
-  // ...
-});
+import { convertRequestBody, safeConvertRequestBody } from 'km-api';
 
-const axiosConfig = downloadPdfApi.convertResponseType('axios');
-// Returns: { responseType: 'blob' }
+// JSON
+convertRequestBody({ name: 'Alice' }, 'application/json');
+// → '{"name":"Alice"}'
+
+// Form URL-encoded
+convertRequestBody({ q: 'search term' }, 'application/x-www-form-urlencoded');
+// → URLSearchParams { 'q' => 'search term' }
+
+// Multipart
+convertRequestBody({ file: myBlob, title: 'photo' }, 'multipart/form-data');
+// → FormData instance
+
+// safeConvertRequestBody — only converts if needed
+safeConvertRequestBody('{"name":"Alice"}', 'application/json'); // returned unchanged
+safeConvertRequestBody({ name: 'Alice' }, 'application/json');  // converted to string
 ```
 
-### Request Body Conversion
+---
 
-Use the adapters module to convert request bodies to the correct format:
+### OpenAPI examples (optional)
 
-```typescript
-import { adapters } from 'km-api';
-
-// JSON conversion
-const jsonBody = adapters.convertRequestBody(
-  { name: 'John', email: 'john@example.com' },
-  'application/json'
-);
-// Returns: '{"name":"John","email":"john@example.com"}'
-
-// Form data conversion
-const formData = adapters.convertRequestBody(
-  { name: 'John', avatar: fileBlob },
-  'multipart/form-data'
-);
-// Returns: FormData instance
-
-// URL-encoded form
-const urlEncoded = adapters.convertRequestBody(
-  { username: 'john', password: 'secret' },
-  'application/x-www-form-urlencoded'
-);
-// Returns: URLSearchParams instance
-
-// Safe conversion (checks if needed)
-const safeBody = adapters.safeConvertRequestBody(
-  '{"already":"json"}',
-  'application/json'
-);
-// Returns unchanged: '{"already":"json"}'
-```
-
-### File Upload Example
+Add `examples` to any endpoint for documentation tools that support OpenAPI 3.0 examples:
 
 ```typescript
-const uploadFileApi = apiConfig.makeApiConfig({
+const createUser = makeApiConfig({
   method: 'POST',
-  pathShape: '/upload',
-  tags: ['#files'],
-  auth: 'YES',
-  requestContentType: 'multipart/form-data',
+  pathShape: '/users',
+  requestContentType: 'application/json',
   responseContentType: 'application/json',
-  summary: 'Upload a file',
   request: {
-    body: z.object({
-      file: z.instanceof(File),
-      description: z.string().optional(),
-    }),
+    body: z.object({ name: z.string(), email: z.string().email() }),
+    params: z.object({}),
+    query: z.object({}),
+    headers: z.object({}),
+    cookies: z.object({}),
+  },
+  response: {
+    201: z.object({ id: z.string(), name: z.string() }),
+    422: z.object({ message: z.string() }),
+  },
+  examples: {
+    request: {
+      alice: {
+        summary: 'Create Alice',
+        value: { name: 'Alice', email: 'alice@example.com' },
+      },
+    },
+    response: {
+      '201': {
+        created: {
+          summary: 'User created successfully',
+          value: { id: 'uuid-here', name: 'Alice' },
+        },
+      },
+      '422': {
+        invalidEmail: {
+          summary: 'Invalid email address',
+          value: { message: 'email: Invalid email' },
+        },
+      },
+    },
+  },
+});
+```
+
+Each example follows the [OpenAPI 3.0 Example Object](https://spec.openapis.org/oas/v3.0.3#example-object):
+
+| Field           | Type      | Description |
+|-----------------|-----------|-------------|
+| `summary`       | `string`  | Short description of the example |
+| `description`   | `string`  | Long description, Markdown supported |
+| `value`         | `unknown` | The example value (mutually exclusive with `externalValue`) |
+| `externalValue` | `string`  | URL to an external example file |
+
+---
+
+### Authentication and headers
+
+```typescript
+const protectedEndpoint = makeApiConfig({
+  method: 'GET',
+  pathShape: '/admin/users',
+  auth: 'YES',
+  request: {
+    body: z.any(),
     params: z.object({}),
     query: z.object({}),
     headers: z.object({
-      'X-Upload-Token': z.string(),
+      Authorization: z.string(),
+      'x-tenant-id': z.string().uuid(),
     }),
-    cookies: z.object({})
+    cookies: z.object({}),
   },
   response: {
-    success: z.object({
-      fileId: z.string(),
-      url: z.string().url(),
-      size: z.number(),
-    }),
-    error: z.object({
-      message: z.string(),
-    }),
+    200: z.array(z.object({ id: z.string() })),
+    401: z.object({ message: z.string() }),
+    403: z.object({ message: z.string() }),
   },
 });
 
-// Usage
-const file = new File(['content'], 'document.pdf', { type: 'application/pdf' });
-const body = uploadFileApi.makeBody({ file, description: 'Important document' });
-const headers = uploadFileApi.makeHeaders({ 'X-Upload-Token': 'token123' });
+const headers = protectedEndpoint.makeHeaders({
+  Authorization: 'Bearer token123',
+  'x-tenant-id': '550e8400-e29b-41d4-a716-446655440000',
+});
 ```
 
-### Authentication & Headers
+---
+
+### Disabling endpoints
 
 ```typescript
-const protectedApi = apiConfig.makeApiConfig({
+const legacyEndpoint = makeApiConfig({
   method: 'GET',
-  pathShape: '/admin/users',
-  auth: 'YES', // Indicates authentication required
-  request: {
-    headers: z.object({
-      'Authorization': z.string(), // Bearer token
-      'X-API-Version': z.string().default('v1'),
-    }),
-    // ...
-  },
-  // ...
+  pathShape: '/v1/users',
+  disable: 'YES',
+  description: 'Deprecated. Use /v2/users instead.',
+  request: { ... },
+  response: { ... },
 });
 
-const headers = protectedApi.makeHeaders({
-  'Authorization': 'Bearer eyJhbGc...',
-  'X-API-Version': 'v1',
-});
+if (legacyEndpoint.disable === 'YES') {
+  console.warn('This endpoint is disabled');
+}
 ```
 
-### Cookies Support
+---
+
+### Complete blog API example
 
 ```typescript
-const sessionApi = apiConfig.makeApiConfig({
-  method: 'GET',
-  pathShape: '/profile',
-  request: {
-    cookies: z.object({
-      sessionId: z.string().uuid(),
-      preferences: z.string().optional(),
-    }),
-    // ...
-  },
-  // ...
-});
-
-const cookies = sessionApi.makeCookies({
-  sessionId: 'sess-123',
-  preferences: 'theme=dark',
-});
-```
-
-### Disabling Endpoints
-
-```typescript
-const deprecatedApi = apiConfig.makeApiConfig({
-  method: 'GET',
-  pathShape: '/old-endpoint',
-  disable: 'YES', // Mark as disabled/deprecated
-  description: 'This endpoint is deprecated. Use /v2/endpoint instead.',
-  // ...
-});
-```
-
-## 🎨 Configuration Options
-
-### Required Fields
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `method` | `'GET' \| 'POST' \| 'PUT' \| 'DELETE' \| 'PATCH' \| 'HEAD' \| 'OPTIONS'` | HTTP method (case-insensitive) |
-| `pathShape` | `string` | API path starting with `/` |
-| `request.body` | `ZodType` | Request body schema |
-| `request.params` | `ZodObject` | URL parameters schema |
-| `request.query` | `ZodObject` | Query parameters schema |
-| `request.headers` | `ZodObject` | Custom headers schema |
-| `request.cookies` | `ZodObject` | Cookie parameters schema |
-| `response.success` | `ZodType` | Success response schema (2xx) |
-| `response.error` | `ZodType` | Error response schema (4xx/5xx) |
-
-### Optional Fields
-
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `tags` | `string[]` | `[]` | Tags for grouping (start with `#`) |
-| `auth` | `'YES' \| 'NO'` | `'NO'` | Authentication requirement |
-| `responseContentType` | `IResponseContentType` | - | Response MIME type |
-| `requestContentType` | `IRequestContentType` | - | Request MIME type |
-| `disable` | `'YES' \| 'NO'` | `'NO'` | Disable endpoint flag |
-| `summary` | `string` | - | Short description |
-| `description` | `string` | - | Detailed description |
-
-### Content Types
-
-#### Response Content Types
-
-Common response types include:
-
-- `'application/json'` - JSON responses
-- `'application/xml'` - XML responses
-- `'application/pdf'` - PDF files
-- `'application/zip'` - ZIP archives
-- `'text/plain'` - Plain text
-- `'text/html'` - HTML content
-- `'text/csv'` - CSV data
-- `'image/png'`, `'image/jpeg'` - Images
-- `'audio/mpeg'`, `'video/mp4'` - Media files
-
-[See full list in schemas.ts](./src/schemas.ts)
-
-#### Request Content Types
-
-Common request types include:
-
-- `'application/json'` - JSON request body
-- `'application/x-www-form-urlencoded'` - URL-encoded forms
-- `'multipart/form-data'` - File uploads
-- `'text/plain'` - Plain text
-- `'application/xml'` - XML data
-
-[See full list in schemas.ts](./src/schemas.ts)
-
-## 🛠️ Helper Methods
-
-### Configuration Helpers
-
-| Method | Parameters | Returns | Description |
-|--------|------------|---------|-------------|
-| `makeBody(body)` | `body: T` | `T` | Type-safe request body |
-| `makeParams(params)` | `params: T` | `T` | Type-safe URL parameters |
-| `makeQueries(queries)` | `queries: T` | `T` | Type-safe query parameters |
-| `makeHeaders(headers)` | `headers: T` | `T` | Type-safe headers |
-| `makeCookies(cookies)` | `cookies: T` | `T` | Type-safe cookies |
-
-### Path Helpers
-
-| Method | Parameters | Returns | Description |
-|--------|------------|---------|-------------|
-| `makeFullPath(params)` | `params: T` | `string` | Generate complete URL with parameter values |
-| `makeOpenAPIPath()` | - | `string` | Convert to OpenAPI format (`{param}`) |
-| `makeParamsStringShape(list)` | `list: string[]` | `string` | Generate parameter shape (`:param` format) |
-
-### Response Helpers
-
-| Method | Parameters | Returns | Description |
-|--------|------------|---------|-------------|
-| `makeResponseSuccessShape(schema, key)` | `schema: ZodType, key?: string` | `ResponseBuilder` | Create response wrapper |
-| `.item()` | - | `ZodObject` | Single item response |
-| `.list(meta)` | `meta: ZodObject` | `ZodObject` | List response with metadata |
-| `paginationSchema()` | - | `ZodObject` | Standard pagination schema |
-
-### Adapter Helpers
-
-| Method | Parameters | Returns | Description |
-|--------|------------|---------|-------------|
-| `convertResponseType(adapter)` | `adapter: AdapterType` | `AdapterConfig` | Convert for HTTP client |
-| `convertRequestBody(data, type)` | `data: any, type: string` | `any` | Convert request body format |
-| `safeConvertRequestBody(data, type)` | `data: any, type: string` | `any` | Convert only if needed |
-| `needsConversion(data, type)` | `data: any, type: string` | `boolean` | Check if conversion needed |
-
-## 📖 Complete Example
-
-Here's a complete example building a blog API:
-
-```typescript
-import { v4, adapters } from 'km-api';
 import { z } from 'zod';
+import { makeApiConfig, makeResponseSuccessShape, paginationSchema } from 'km-api';
 
-// Schemas
 const postSchema = z.object({
   id: z.string().uuid(),
   title: z.string(),
   content: z.string(),
   authorId: z.string().uuid(),
-  published: z.boolean(),
   createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
 });
 
-const authorSchema = z.object({
-  id: z.string().uuid(),
-  name: z.string(),
-  email: z.string().email(),
-});
+const errorSchema = z.object({ message: z.string(), code: z.number().int() });
 
-// List posts
-const listPostsApi = apiConfig.makeApiConfig({
-  method: 'GET',
-  pathShape: '/posts',
-  tags: ['#posts'],
-  auth: 'NO',
-  responseContentType: 'application/json',
-  summary: 'List all posts',
-  request: {
-    body: z.any(),
-    params: z.object({}),
-    query: z.object({
-      page: z.number().default(1),
-      limit: z.number().default(20),
-      published: z.boolean().optional(),
-    }),
-    headers: z.object({}),
-    cookies: z.object({})
-  },
-  response: {
-    success: apiConfig.makeResponseSuccessShape(postSchema, 'posts')
-      .list(apiConfig.paginationSchema()),
-    error: z.object({ message: z.string() }),
-  },
-});
-
-// Get single post
-const getPostApi = apiConfig.makeApiConfig({
-  method: 'GET',
-  pathShape: '/posts/{id}',
-  tags: ['#posts'],
-  auth: 'NO',
-  responseContentType: 'application/json',
-  summary: 'Get post by ID',
-  request: {
-    body: z.any(),
-    params: z.object({ id: z.string().uuid() }),
-    query: z.object({ include: z.enum(['author']).optional() }),
-    headers: z.object({}),
-    cookies: z.object({})
-  },
-  response: {
-    success: apiConfig.makeResponseSuccessShape(
-      postSchema.extend({ author: authorSchema.optional() }),
-      'post'
-    ).item(),
-    error: z.object({ message: z.string() }),
-  },
-});
-
-// Create post
-const createPostApi = apiConfig.makeApiConfig({
-  method: 'POST',
-  pathShape: '/posts',
-  tags: ['#posts'],
-  auth: 'YES',
-  requestContentType: 'application/json',
-  responseContentType: 'application/json',
-  summary: 'Create a new post',
-  request: {
-    body: z.object({
-      title: z.string().min(1).max(200),
-      content: z.string().min(1),
-      published: z.boolean().default(false),
-    }),
-    params: z.object({}),
-    query: z.object({}),
-    headers: z.object({
-      'Authorization': z.string(),
-    }),
-    cookies: z.object({})
-  },
-  response: {
-    success: apiConfig.makeResponseSuccessShape(postSchema, 'post').item(),
-    error: z.object({
-      message: z.string(),
-      errors: z.array(z.object({
-        field: z.string(),
-        issue: z.string(),
-      })).optional(),
-    }),
-  },
-});
-
-// Usage
-async function example() {
-  // List posts
-  const listQueries = listPostsApi.makeQueries({ page: 1, limit: 10, published: true });
-  
-  // Get post
-  const postParams = getPostApi.makeParams({ id: 'post-123' });
-  const postPath = getPostApi.makeFullPath(postParams);
-  
-  // Create post
-  const newPost = createPostApi.makeBody({
-    title: 'My New Post',
-    content: 'Post content here...',
-    published: true,
-  });
-  
-  const authHeaders = createPostApi.makeHeaders({
-    'Authorization': 'Bearer token123',
-  });
-  
-  // Convert for Axios
-  const axiosConfig = createPostApi.convertResponseType('axios');
-  
-  // Make request (pseudo-code)
-  // const response = await axios.post(
-  //   createPostApi.pathShape,
-  //   newPost,
-  //   { ...axiosConfig, headers: authHeaders }
-  // );
-}
-```
-
-## 🔧 Advanced Usage
-
-### Custom Response Wrappers
-
-```typescript
-// Custom wrapper key
-const customResponse = apiConfig.makeResponseSuccessShape(userSchema, 'userData');
-
-// Single item
-const item = customResponse.item();
-// Type: { userData: User }
-
-// List
-const list = customResponse.list(z.object({
-  meta: z.object({
-    page: z.number(),
-    total: z.number(),
-  }),
-}));
-// Type: { userData: User[], meta: { page, total } }
-```
-
-### OpenAPI Documentation Generation
-
-```typescript
-const api = apiConfig.makeApiConfig({
-  method: 'GET',
-  pathShape: '/users/:id',
-  summary: 'Get user',
-  description: 'Retrieves user details by ID',
-  tags: ['#users'],
-  // ...
-});
-
-// Get OpenAPI-compatible path
-const openApiPath = api.makeOpenAPIPath();
-// Returns: "/users/{id}"
-
-// Use in OpenAPI spec generation
-const openApiSpec = {
-  openapi: '3.0.0',
-  paths: {
-    [openApiPath]: {
-      [api.method.toLowerCase()]: {
-        summary: api.summary,
-        description: api.description,
-        tags: api.tags?.map(t => t.replace('#', '')),
-        // ... more OpenAPI fields
-      },
-    },
-  },
-};
-```
-
-### Middleware Integration
-
-```typescript
-import express from 'express';
-import { v4 } from 'km-api';
-
-const getUserApi = apiConfig.makeApiConfig({
-  // ... configuration
-});
-
-const app = express();
-
-// Validation middleware
-app.get('/users/:id', async (req, res) => {
-  try {
-    // Validate params
-    const params = getUserApi.request.params.parse(req.params);
-    
-    // Validate query
-    const query = getUserApi.request.query.parse(req.query);
-    
-    // Your logic here
-    const user = await db.users.findById(params.id);
-        
-    res.json(user);
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      res.status(400).json(error);
-    }
-  }
-});
-```
-
-## 🧪 Testing
-
-```typescript
-import { describe, it, expect } from 'vitest';
-import { v4 } from 'km-api';
-import { z } from 'zod';
-
-describe('User API', () => {
-  const getUserApi = apiConfig.makeApiConfig({
+const blogApi = {
+  listPosts: makeApiConfig({
     method: 'GET',
-    pathShape: '/users/{id}',
+    pathShape: '/posts',
+    auth: 'NO',
+    responseContentType: 'application/json',
+    summary: 'List all posts',
     request: {
-      params: z.object({ id: z.string() }),
-      // ...
+      body: z.any(),
+      params: z.object({}),
+      query: z.object({
+        page: z.number().int().min(1).optional(),
+        limit: z.number().int().max(100).optional(),
+        tag: z.string().optional(),
+      }),
+      headers: z.object({}),
+      cookies: z.object({}),
     },
     response: {
-      success: z.object({ id: z.string(), name: z.string() }),
-      error: z.object({ message: z.string() }),
+      200: makeResponseSuccessShape(postSchema, 'posts').list(paginationSchema()),
     },
-  });
+  }),
 
-  it('should generate correct path', () => {
-    const params = getUserApi.makeParams({ id: '123' });
-    const path = getUserApi.makeFullPath(params);
-    expect(path).toBe('/users/123');
-  });
+  getPost: makeApiConfig({
+    method: 'GET',
+    pathShape: '/posts/{slug}',
+    auth: 'NO',
+    responseContentType: 'application/json',
+    summary: 'Get post by slug',
+    request: {
+      body: z.any(),
+      params: z.object({ slug: z.string() }),
+      query: z.object({}),
+      headers: z.object({}),
+      cookies: z.object({}),
+    },
+    response: {
+      200: makeResponseSuccessShape(postSchema, 'post').item(),
+      404: errorSchema,
+    },
+  }),
 
-  it('should validate success response', () => {
-    const response = { id: '123', name: 'John' };
-    expect(() => getUserApi.response.success.parse(response)).not.toThrow();
-  });
+  createPost: makeApiConfig({
+    method: 'POST',
+    pathShape: '/posts',
+    auth: 'YES',
+    requestContentType: 'application/json',
+    responseContentType: 'application/json',
+    summary: 'Create a new post',
+    tags: ['#posts', '#write'],
+    request: {
+      body: z.object({
+        title: z.string().min(3).max(200),
+        content: z.string().min(10),
+        tags: z.array(z.string()).optional(),
+      }),
+      params: z.object({}),
+      query: z.object({}),
+      headers: z.object({ Authorization: z.string() }),
+      cookies: z.object({}),
+    },
+    response: {
+      201: makeResponseSuccessShape(postSchema, 'post').item(),
+      400: errorSchema,
+      401: errorSchema,
+    },
+  }),
 
-  it('should reject invalid response', () => {
-    const response = { id: 123, name: 'John' }; // id should be string
-    expect(() => getUserApi.response.success.parse(response)).toThrow();
-  });
-});
+  deletePost: makeApiConfig({
+    method: 'DELETE',
+    pathShape: '/posts/{id}',
+    auth: 'YES',
+    summary: 'Delete a post',
+    request: {
+      body: z.any(),
+      params: z.object({ id: z.string().uuid() }),
+      query: z.object({}),
+      headers: z.object({ Authorization: z.string() }),
+      cookies: z.object({}),
+    },
+    response: {
+      204: z.object({}),
+      403: errorSchema,
+      404: errorSchema,
+    },
+  }),
+};
+
+// Usage
+const listQuery = blogApi.listPosts.makeQueries({ page: 2, limit: 10 });
+const postPath = blogApi.getPost.makeFullPath({ slug: 'hello-world' });
+const axiosCfg = blogApi.createPost.convertResponseType('axios');
 ```
-
-## 📦 Package Structure
-
-```
-km-api/
-├── src/
-│   ├── index.ts          # Main entry point
-│   ├── apiConfig.ts             # API configuration factory
-│   ├── schemas.ts        # Zod schemas and types
-│   └── adapters.ts       # HTTP client adapters
-├── build/
-│   ├── esm/              # ES modules
-│   ├── cjs/              # CommonJS
-│   ├── js/               # JavaScript
-│   └── types/            # TypeScript declarations
-└── README.md
-```
-
-## 🔄 Migration Guide
-
-### From v0.0.x to v0.1.x
-
-1. **Update dependencies:**
-   ```bash
-   npm install typescript@~5.9.2 zod@^3.25.67
-   ```
-
-2. **Property rename:**
-   ```typescript
-   // Before
-   { path: '/users/:id' }
-   
-   // After
-   { pathShape: '/users/:id' }
-   ```
-
-3. **Path generation:**
-   ```typescript
-   // Before
-   const orderList = api.makeParamsOrderedList(['id']);
-   const path = api.makeFullPath(params, orderList);
-   
-   // After
-   const path = api.makeFullPath(params);
-   ```
-
-4. **Removed methods:**
-   - `makeParamsOrderedList()` - No replacement needed
-   - `makeParamsString()` - No replacement needed
-   - `makeFullPathShape()` - Use `makeOpenAPIPath()` instead
-
-## 🤝 Contributing
-
-Contributions are welcome! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/my-feature`
-3. Make your changes and add tests
-4. Run tests: `bun test`
-5. Format code: `bun run fix`
-6. Commit: `git commit -m 'Add my feature'`
-7. Push: `git push origin feature/my-feature`
-8. Open a Pull Request
-
-## 📄 License
-
-MIT © [komeilm76](https://github.com/komeilm76)
-
-## 🔗 Links
-
-- [npm Package](https://www.npmjs.com/package/km-api)
-- [GitHub Repository](https://github.com/komeilm76/km-api)
-- [Issue Tracker](https://github.com/komeilm76/km-api/issues)
-- [Zod Documentation](https://zod.dev/)
-- [OpenAPI Specification](https://swagger.io/specification/)
-
-## 💬 Support
-
-- 📧 Email: [komeilmohammadi76@gmail.com](mailto:komeilmohammadi76@gmail.com)
-- 🐛 Issues: [GitHub Issues](https://github.com/komeilm76/km-api/issues)
-- 💬 Discussions: [GitHub Discussions](https://github.com/komeilm76/km-api/discussions)
-
-## 🌟 Show Your Support
-
-If you find this package helpful, please give it a ⭐️ on [GitHub](https://github.com/komeilm76/km-api)!
 
 ---
 
-Made with ❤️ by [komeilm76](https://github.com/komeilm76)
+## Testing with Jest
+
+Install test dependencies:
+
+```bash
+npm install --save-dev jest ts-jest @types/jest
+```
+
+Configure Jest (`jest.config.ts`):
+
+```typescript
+import type { Config } from 'jest';
+
+export default {
+  preset: 'ts-jest',
+  testEnvironment: 'node',
+  testMatch: ['**/*.test.ts'],
+} satisfies Config;
+```
+
+Write tests against your endpoint configs:
+
+```typescript
+import { getUser } from './api/users';
+
+describe('getUser', () => {
+  it('resolves path correctly', () => {
+    expect(getUser.makeFullPath({ id: '123' })).toBe('/users/123');
+  });
+
+  it('converts to OpenAPI path', () => {
+    expect(getUser.makeOpenAPIPath()).toBe('/users/{id}');
+  });
+
+  it('returns axios config for JSON', () => {
+    expect(getUser.convertResponseType('axios')).toEqual({ responseType: 'json' });
+  });
+
+  it('validates params schema', () => {
+    const validParams = getUser.request.params.parse({ id: '550e8400-e29b-41d4-a716-446655440000' });
+    expect(validParams).toEqual({ id: '550e8400-e29b-41d4-a716-446655440000' });
+  });
+});
+```
+
+---
+
+## Migration: v0.2.x → v0.3.x
+
+### Import style
+
+v0.2.x used a deeply nested namespace:
+
+```typescript
+// OLD (v0.2.x)
+import { kmApi } from 'km-api';
+kmApi.apiConfig.makeApiConfig({ ... });
+```
+
+v0.3.x uses flat exports:
+
+```typescript
+// NEW (v0.3.x)
+import { makeApiConfig } from 'km-api';
+makeApiConfig({ ... });
+```
+
+All names are the same — only the import path changed.
+
+### Removed dependency
+
+`km-type` is no longer required. Remove it from your `package.json` if you installed it separately.
+
+---
+
+## Migration: v0.1.x → v0.2.x
+
+### Breaking changes
+
+**`path` renamed to `pathShape`**
+
+```typescript
+// v0.1.x
+{ path: '/users/{id}' }
+
+// v0.2.x+
+{ pathShape: '/users/{id}' }
+```
+
+**Response object restructured**
+
+```typescript
+// v0.1.x
+response: {
+  success: z.object({ ... }),
+  error: z.object({ ... }),
+}
+
+// v0.2.x+
+response: {
+  200: z.object({ ... }),
+  400: z.object({ ... }),
+}
+```
+
+**Removed functions**
+
+- `makeParamsOrderedList()` — removed
+- `makeParamsString()` — removed
+- `makeFullPathShape()` — removed
+- `makeFullPath(params, orderList)` → `makeFullPath(params)` (no second argument)
+
+---
+
+## Contributing
+
+1. Fork the repo
+2. Create your branch: `git checkout -b feature/my-feature`
+3. Run tests: `npm test`
+4. Submit a PR
+
+## License
+
+[MIT](./LICENSE) © komeilm76

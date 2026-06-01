@@ -1,61 +1,24 @@
 {
   "name": "km-api",
-  "version": "0.2.4",
+  "version": "0.3.0",
+  "description": "Type-safe API schema builder for TypeScript — define HTTP endpoints with Zod validation, full OpenAPI 3.0 compatibility, and adapters for Axios, Fetch, and Alova.",
   "license": "MIT",
-  "description": "its package for make api services easy",
+  "author": "komeilm76",
+  "homepage": "https://github.com/komeilm76/km-api#readme",
+  "bugs": {
+    "url": "https://github.com/komeilm76/km-api/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/komeilm76/km-api.git"
+  },
   "main": "build/js/index.js",
   "module": "build/esm/index.mjs",
   "types": "build/types/index.d.ts",
   "typings": "build/types/index.d.ts",
-  "browser": {
-    "./browser-cjs.js": "./cjs/index.cjs",
-    "./browser-esm.js": "./mjs/index.mjs"
-  },
-  "repository": {
-    "url": "git+https://github.com/komeilm76/km-api.git"
-  },
-  "scripts": {
-    "fix:prettier": "prettier \"src/**/*.{ts,json}\" --write && prettier \"*.json\" --write",
-    "fix": "bun run fix:prettier",
-    "dev": "bun --watch run ./src/index.ts",
-    "build:types": "tsc",
-    "build:tsup": "bun run build:types && tsup",
-    "build": "bun run build:types && bun run build:tsup",
-    "publish-directly": "npm publish --access public",
-    "auto-release": "npm run fix:prettier && npm run build && release-it"
-  },
-  "devDependencies": {
-    "@types/bun": "latest",
-    "release-it": "^19.2.2",
-    "typescript": "~5.9.2",
-    "prettier": "^2.1.1",
-    "tsup": "^8.5.0",
-    "zod": "^4.3.6"
-  },
-  "engines": {
-    "node": ">=14"
-  },
-  "files": [
-    "build",
-    "src",
-    "README.md",
-    "LICENSE"
-  ],
-  "keywords": [
-    "tsup",
-    "bun",
-    "release",
-    "publish",
-    "typeScript",
-    "km-packages",
-    "km-api",
-    "zod",
-    "api"
-  ],
   "exports": {
     ".": {
       "bun": "./src/index.ts",
-      "node": "./build/js/index.js",
       "types": "./build/types/index.d.ts",
       "require": "./build/cjs/index.cjs",
       "import": "./build/esm/index.mjs",
@@ -72,13 +35,65 @@
     "./cjs": {
       "types": "./build/cjs/index.d.ts",
       "require": "./build/cjs/index.cjs"
-    },
-    "./assets/*": "./src/assets/*"
+    }
   },
-  "dependencies": {
-    "km-type": "^0.0.6"
+  "files": [
+    "build",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "api",
+    "openapi",
+    "swagger",
+    "rest-api",
+    "typescript",
+    "type-safe",
+    "zod",
+    "schema-validation",
+    "api-schema",
+    "api-config",
+    "http-client",
+    "axios",
+    "fetch",
+    "alova",
+    "endpoint",
+    "request",
+    "response",
+    "km-api",
+    "km-packages",
+    "openapi3",
+    "swagger2"
+  ],
+  "scripts": {
+    "fix:prettier": "prettier \"src/**/*.{ts,json}\" --write && prettier \"*.json\" --write",
+    "fix": "bun run fix:prettier",
+    "dev": "bun --watch run ./src/index.ts",
+    "build:types": "tsc",
+    "build:tsup": "bun run build:types && tsup",
+    "build": "bun run build:types && bun run build:tsup",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "test:watch": "jest --watch",
+    "publish-directly": "npm publish --access public",
+    "auto-release": "npm run fix:prettier && npm run build && npm test && release-it"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/jest": "^29.5.14",
+    "jest": "^29.7.0",
+    "prettier": "^2.1.1",
+    "release-it": "^19.2.2",
+    "ts-jest": "^29.4.11",
+    "tsup": "^8.5.0",
+    "typescript": "~5.9.2",
+    "zod": "^4.3.6"
   },
   "peerDependencies": {
     "zod": "^4.3.6"
+  },
+  "engines": {
+    "node": ">=14"
   }
 }

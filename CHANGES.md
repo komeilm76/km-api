@@ -1,8 +1,142 @@
-# API Configuration Package - Changes and Improvements
+# km-api — Changelog
+
+---
+
+## v0.3.0 — Quality Rewrite
+
+### Breaking changes
+
+**Flat import API (import style changed)**
+
+The old nested namespace export is removed. Use direct named imports:
+
+```typescript
+// Before (v0.2.x)
+import { kmApi } from 'km-api';
+kmApi.apiConfig.makeApiConfig({ ... });
+kmApi.adapters.convertResponseType(...);
+kmApi.schemas.methodSchema;
+
+// After (v0.3.x)
+import { makeApiConfig, convertResponseType, methodSchema } from 'km-api';
+makeApiConfig({ ... });
+convertResponseType(...);
+methodSchema;
+```
+
+All function and type names are identical — only the import path changed.
+
+**`km-type` dependency removed**
+
+`km-type` is no longer a dependency. If you installed it separately, you can remove it.
+
+---
+
+### New features
+
+**OpenAPI 3.0 examples**
+
+Every endpoint config now accepts an optional `examples` field aligned with the
+[OpenAPI 3.0 Example Object](https://spec.openapis.org/oas/v3.0.3#example-object):
+
+```typescript
+makeApiConfig({
+  method: 'POST',
+  pathShape: '/users',
+  // ...
+  examples: {
+    request: {
+      alice: { value: { name: 'Alice', email: 'alice@example.com' }, summary: 'Create Alice' },
+    },
+    response: {
+      '201': {
+        created: { value: { id: '1', name: 'Alice' }, summary: 'User created' },
+      },
+      '422': {
+        invalid: { value: { message: 'Invalid email' }, summary: 'Validation error' },
+      },
+    },
+  },
+});
+```
+
+---
+
+### Source restructure
+
+`src/lib/api/` (single deep directory) replaced with three focused modules:
+
+| Old file               | New location                    |
+|------------------------|---------------------------------|
+| `src/lib/api/schemas.ts` | `src/schemas/content-types.ts` |
+|                          | `src/schemas/http.ts`          |
+|                          | `src/schemas/endpoint.ts`      |
+| `src/lib/api/adapters.ts`| `src/adapters/response.ts`     |
+|                          | `src/adapters/request.ts`      |
+| `src/lib/api/v4.ts`      | `src/config/factory.ts`        |
+|                          | `src/config/shapes.ts`         |
+| `src/example.consumer.ts`| `examples/basic.ts`            |
+
+Each module has its own `index.ts` re-exporting everything. `src/index.ts` provides a single flat surface.
+
+---
+
+### Tests
+
+Jest + ts-jest test suite added covering all modules:
+
+```
+tests/
+├── schemas/
+│   ├── content-types.test.ts
+│   ├── http.test.ts
+│   └── endpoint.test.ts
+├── adapters/
+│   ├── response.test.ts
+│   └── request.test.ts
+└── config/
+    ├── factory.test.ts
+    └── shapes.test.ts
+```
+
+- **157 tests** — all passing
+- **Coverage:** 91% statements · 86% branches · 96% functions
+
+Run with:
+
+```bash
+npm test           # run once
+npm run test:coverage  # with coverage report
+npm run test:watch     # watch mode
+```
+
+---
+
+### package.json fixes
+
+- **Description** — changed from "its package for make api services easy" to a proper searchable sentence
+- **Keywords** — expanded from 9 to 20 terms (`openapi`, `swagger`, `rest-api`, `type-safe`, `axios`, `fetch`, `alova`, `schema-validation`, `endpoint`, `api-config`, …)
+- **`browser` field** — removed (was pointing to non-existent paths)
+- **`km-type` dependency** — removed (was imported but never used)
+- **Added** `author`, `homepage`, `bugs` fields
+- **`auto-release`** now runs `npm test` before publishing
+
+---
+
+### README
+
+Fully rewritten to match the current API, correct version, and Zod 4.x.
+Includes: migration guide, OpenAPI examples section, Jest testing section.
+
+---
 
 ## Overview
 
-This document details the changes made to your API configuration package, including comprehensive JSDoc documentation and key functional updates to the `v4.ts` module.
+This document details the changes made to the km-api package across versions.
+
+---
+
+## v0.2.x — Status-code keyed responses, dual path syntax
 
 ---
 
