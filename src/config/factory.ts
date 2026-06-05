@@ -31,7 +31,8 @@ import type {
  * - `makeHeaders(data)` — type-safe custom headers
  * - `makeCookies(data)` — type-safe cookies
  * - `makeFullPath(params)` — resolved URL (replaces `:param` / `{param}`)
- * - `makeOpenAPIPath()` — converts Express params to OpenAPI `{param}` format
+ * - `makeOpenApiPathShape()` — converts Express params to OpenAPI `{param}` format
+ * - `makeExpressPathShape()` — converts OpenAPI `{param}` to Express `:param` format
  * - `convertResponseType(adapter)` — adapter-specific response config
  *
  * @example
@@ -65,7 +66,8 @@ import type {
  * });
  *
  * const path = getUser.makeFullPath({ id: '123' }); // '/users/123'
- * const openApi = getUser.makeOpenAPIPath();         // '/users/{id}'
+ * const openApi = getUser.makeOpenApiPathShape();     // '/users/{id}'
+ * const express = getUser.makeExpressPathShape();    // '/users/:id'
  * const axiosCfg = getUser.convertResponseType('axios'); // { responseType: 'json' }
  * ```
  */
@@ -148,11 +150,23 @@ const makeApiConfig = <
    * @example
    * ```typescript
    * // pathShape: '/users/:id/posts/:postId'
-   * makeOpenAPIPath(); // '/users/{id}/posts/{postId}'
+   * makeOpenApiPathShape(); // '/users/{id}/posts/{postId}'
    * ```
    */
-  const makeOpenAPIPath = (): string =>
+  const makeOpenApiPathShape = (): string =>
     entryConfig.pathShape.replace(/:([a-zA-Z_][a-zA-Z0-9_]*)/g, '{$1}');
+
+  /**
+   * Converts path parameters to Express `:param` format.
+   *
+   * @example
+   * ```typescript
+   * // pathShape: '/users/{id}/posts/{postId}'
+   * makeExpressPathShape(); // '/users/:id/posts/:postId'
+   * ```
+   */
+  const makeExpressPathShape = (): string =>
+    entryConfig.pathShape.replace(/\{([a-zA-Z_][a-zA-Z0-9_]*)\}/g, ':$1');
 
   /**
    * Returns the adapter-specific response configuration for the endpoint's content type.
@@ -174,7 +188,8 @@ const makeApiConfig = <
     makeHeaders,
     makeCookies,
     makeFullPath,
-    makeOpenAPIPath,
+    makeOpenApiPathShape,
+    makeExpressPathShape,
     convertResponseType: convertResponseTypeHelper,
   };
 };

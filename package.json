@@ -1,6 +1,6 @@
 {
   "name": "km-api",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Type-safe API schema builder for TypeScript — define HTTP endpoints with Zod validation, full OpenAPI 3.0 compatibility, and adapters for Axios, Fetch, and Alova.",
   "license": "MIT",
   "author": "komeilm76",

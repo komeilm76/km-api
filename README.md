@@ -34,7 +34,8 @@ bun add km-api zod
 
 | km-api  | TypeScript | Zod  | Node.js |
 |---------|------------|------|---------|
-| 0.3.x   | 5.9+       | 4.x  | 14+     |
+| 0.3.1   | 5.9+       | 4.x  | 14+     |
+| 0.3.0   | 5.9+       | 4.x  | 14+     |
 | 0.2.x   | 5.9+       | 4.x  | 14+     |
 | 0.1.x   | 5.x        | 3.x  | 14+     |
 
@@ -72,8 +73,12 @@ getUser.makeFullPath({ id: '550e8400-e29b-41d4-a716-446655440000' });
 // → '/users/550e8400-e29b-41d4-a716-446655440000'
 
 // OpenAPI path format
-getUser.makeOpenAPIPath();
+getUser.makeOpenApiPathShape();
 // → '/users/{id}'
+
+// Express path format
+getUser.makeExpressPathShape();
+// → '/users/:id'
 
 // HTTP client adapter config
 getUser.convertResponseType('axios');   // { responseType: 'json' }
@@ -119,7 +124,8 @@ Creates a typed endpoint configuration with helper methods attached.
 | `makeHeaders` | `(headers) => headers` | Returns type-safe headers |
 | `makeCookies` | `(cookies) => cookies` | Returns type-safe cookies |
 | `makeFullPath` | `(params) => string` | Resolves the path template to a URL |
-| `makeOpenAPIPath` | `() => string` | Converts path to OpenAPI `{param}` format |
+| `makeOpenApiPathShape` | `() => string` | Converts path to OpenAPI `{param}` format |
+| `makeExpressPathShape` | `() => string` | Converts path to Express `:param` format |
 | `convertResponseType` | `(adapter) => AdapterConfig` | Returns adapter-specific response config |
 
 ---
@@ -141,7 +147,8 @@ pathShape: '/users/:id/posts/{postId}'
 
 ```typescript
 config.makeFullPath({ id: '1', postId: '42' }); // '/users/1/posts/42'
-config.makeOpenAPIPath();                         // '/users/{id}/posts/{postId}'
+config.makeOpenApiPathShape();                    // '/users/{id}/posts/{postId}'
+config.makeExpressPathShape();                    // '/users/:id/posts/:postId'
 ```
 
 ---
@@ -502,7 +509,11 @@ describe('getUser', () => {
   });
 
   it('converts to OpenAPI path', () => {
-    expect(getUser.makeOpenAPIPath()).toBe('/users/{id}');
+    expect(getUser.makeOpenApiPathShape()).toBe('/users/{id}');
+  });
+
+  it('converts to Express path', () => {
+    expect(getUser.makeExpressPathShape()).toBe('/users/:id');
   });
 
   it('returns axios config for JSON', () => {
@@ -514,6 +525,34 @@ describe('getUser', () => {
     expect(validParams).toEqual({ id: '550e8400-e29b-41d4-a716-446655440000' });
   });
 });
+```
+
+---
+
+## Migration: v0.3.0 → v0.3.1
+
+### Renamed helper method
+
+`makeOpenAPIPath()` has been renamed to `makeOpenApiPathShape()` for naming consistency.
+
+```typescript
+// OLD (v0.3.0)
+config.makeOpenAPIPath();
+
+// NEW (v0.3.1)
+config.makeOpenApiPathShape();
+```
+
+### New helper method
+
+`makeExpressPathShape()` converts any path to Express `:param` format:
+
+```typescript
+// pathShape: '/users/{id}/posts/{postId}'
+config.makeExpressPathShape(); // '/users/:id/posts/:postId'
+
+// pathShape: '/users/:id'  (already Express-style — unchanged)
+config.makeExpressPathShape(); // '/users/:id'
 ```
 
 ---

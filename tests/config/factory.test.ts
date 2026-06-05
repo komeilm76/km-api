@@ -39,7 +39,8 @@ describe('makeApiConfig', () => {
     expect(typeof config.makeHeaders).toBe('function');
     expect(typeof config.makeCookies).toBe('function');
     expect(typeof config.makeFullPath).toBe('function');
-    expect(typeof config.makeOpenAPIPath).toBe('function');
+    expect(typeof config.makeOpenApiPathShape).toBe('function');
+    expect(typeof config.makeExpressPathShape).toBe('function');
     expect(typeof config.convertResponseType).toBe('function');
   });
 
@@ -230,9 +231,9 @@ describe('makeFullPath', () => {
   });
 });
 
-// ---- makeOpenAPIPath --------------------------------------------------------
+// ---- makeOpenApiPathShape ---------------------------------------------------
 
-describe('makeOpenAPIPath', () => {
+describe('makeOpenApiPathShape', () => {
   it('converts :param to {param}', () => {
     const config = makeApiConfig({
       method: 'GET',
@@ -247,7 +248,7 @@ describe('makeOpenAPIPath', () => {
       response: {},
     });
 
-    expect(config.makeOpenAPIPath()).toBe('/users/{userId}/posts/{postId}');
+    expect(config.makeOpenApiPathShape()).toBe('/users/{userId}/posts/{postId}');
   });
 
   it('leaves {param} paths unchanged', () => {
@@ -264,7 +265,7 @@ describe('makeOpenAPIPath', () => {
       response: {},
     });
 
-    expect(config.makeOpenAPIPath()).toBe('/users/{id}');
+    expect(config.makeOpenApiPathShape()).toBe('/users/{id}');
   });
 
   it('returns plain paths unchanged', () => {
@@ -281,7 +282,79 @@ describe('makeOpenAPIPath', () => {
       response: {},
     });
 
-    expect(config.makeOpenAPIPath()).toBe('/health');
+    expect(config.makeOpenApiPathShape()).toBe('/health');
+  });
+});
+
+// ---- makeExpressPathShape ---------------------------------------------------
+
+describe('makeExpressPathShape', () => {
+  it('converts {param} to :param', () => {
+    const config = makeApiConfig({
+      method: 'GET',
+      pathShape: '/users/{userId}/posts/{postId}',
+      request: {
+        body: z.any(),
+        params: z.object({ userId: z.string(), postId: z.string() }),
+        query: z.object({}),
+        headers: z.object({}),
+        cookies: z.object({}),
+      },
+      response: {},
+    });
+
+    expect(config.makeExpressPathShape()).toBe('/users/:userId/posts/:postId');
+  });
+
+  it('leaves :param paths unchanged', () => {
+    const config = makeApiConfig({
+      method: 'GET',
+      pathShape: '/users/:id',
+      request: {
+        body: z.any(),
+        params: z.object({ id: z.string() }),
+        query: z.object({}),
+        headers: z.object({}),
+        cookies: z.object({}),
+      },
+      response: {},
+    });
+
+    expect(config.makeExpressPathShape()).toBe('/users/:id');
+  });
+
+  it('returns plain paths unchanged', () => {
+    const config = makeApiConfig({
+      method: 'GET',
+      pathShape: '/health',
+      request: {
+        body: z.any(),
+        params: z.object({}),
+        query: z.object({}),
+        headers: z.object({}),
+        cookies: z.object({}),
+      },
+      response: {},
+    });
+
+    expect(config.makeExpressPathShape()).toBe('/health');
+  });
+
+  it('handles mixed syntax — converts only {param} to :param', () => {
+    const config = makeApiConfig({
+      method: 'GET',
+      pathShape: '/users/:id/posts/{postId}',
+      request: {
+        body: z.any(),
+        params: z.object({ id: z.string(), postId: z.string() }),
+        query: z.object({}),
+        headers: z.object({}),
+        cookies: z.object({}),
+      },
+      response: {},
+    });
+
+    expect(config.makeExpressPathShape()).toBe('/users/:id/posts/:postId');
   });
 });
 
