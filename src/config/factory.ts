@@ -1,4 +1,3 @@
-import { z } from 'zod';
 import { convertResponseType, type AdapterType } from '../adapters/response';
 import type {
   IAuthStatus,
@@ -110,19 +109,19 @@ const makeApiConfig = <
   entryConfig: CONFIG
 ) => {
   /** Returns a type-safe request body that conforms to the configured body schema. */
-  const makeBody = <B extends z.infer<CONFIG['request']['body']>>(body: B) => body;
+  const makeBody = <B extends CONFIG['request']['body']['_zod']['output']>(body: B) => body;
 
   /** Returns type-safe query parameters that conform to the configured query schema. */
-  const makeQueries = <Q extends z.infer<CONFIG['request']['query']>>(queries: Q) => queries;
+  const makeQueries = <Q extends CONFIG['request']['query']['_zod']['output']>(queries: Q) => queries;
 
   /** Returns type-safe path parameters that conform to the configured params schema. */
-  const makeParams = <P extends z.infer<CONFIG['request']['params']>>(params: P) => params;
+  const makeParams = <P extends CONFIG['request']['params']['_zod']['output']>(params: P) => params;
 
   /** Returns type-safe custom headers that conform to the configured headers schema. */
-  const makeHeaders = <H extends z.infer<CONFIG['request']['headers']>>(headers: H) => headers;
+  const makeHeaders = <H extends CONFIG['request']['headers']['_zod']['output']>(headers: H) => headers;
 
   /** Returns type-safe cookies that conform to the configured cookies schema. */
-  const makeCookies = <C extends z.infer<CONFIG['request']['cookies']>>(cookies: C) => cookies;
+  const makeCookies = <C extends CONFIG['request']['cookies']['_zod']['output']>(cookies: C) => cookies;
 
   /**
    * Resolves the path template to a full URL by substituting parameter values.
@@ -135,7 +134,7 @@ const makeApiConfig = <
    * makeFullPath({ id: '1', postId: '42' }); // '/users/1/posts/42'
    * ```
    */
-  const makeFullPath = <P extends z.infer<CONFIG['request']['params']>>(params: P): string => {
+  const makeFullPath = <P extends CONFIG['request']['params']['_zod']['output']>(params: P): string => {
     let path = entryConfig.pathShape as string;
     for (const [key, value] of Object.entries(params as Record<string, unknown>)) {
       path = path.replace(new RegExp(`:${key}(?=/|$)`, 'g'), String(value));

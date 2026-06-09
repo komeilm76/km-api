@@ -34,8 +34,7 @@ bun add km-api zod
 
 | km-api  | TypeScript | Zod  | Node.js |
 |---------|------------|------|---------|
-| 0.3.1   | 5.9+       | 4.x  | 14+     |
-| 0.3.0   | 5.9+       | 4.x  | 14+     |
+| 0.3.x   | 5.9+       | 4.x  | 14+     |
 | 0.2.x   | 5.9+       | 4.x  | 14+     |
 | 0.1.x   | 5.x        | 3.x  | 14+     |
 
@@ -478,29 +477,32 @@ const axiosCfg = blogApi.createPost.convertResponseType('axios');
 
 ---
 
-## Testing with Jest
+## Testing with Vitest
 
 Install test dependencies:
 
 ```bash
-npm install --save-dev jest ts-jest @types/jest
+npm install --save-dev vitest
+# or
+bun add -d vitest
 ```
 
-Configure Jest (`jest.config.ts`):
+Configure Vitest (`vitest.config.ts`):
 
 ```typescript
-import type { Config } from 'jest';
+import { defineConfig } from 'vitest/config';
 
-export default {
-  preset: 'ts-jest',
-  testEnvironment: 'node',
-  testMatch: ['**/*.test.ts'],
-} satisfies Config;
+export default defineConfig({
+  test: {
+    environment: 'node',
+  },
+});
 ```
 
 Write tests against your endpoint configs:
 
 ```typescript
+import { describe, it, expect } from 'vitest';
 import { getUser } from './api/users';
 
 describe('getUser', () => {
@@ -526,6 +528,30 @@ describe('getUser', () => {
   });
 });
 ```
+
+---
+
+## Migration: v0.3.2 → v0.3.3
+
+No API changes. This release replaces Zod types in all exported generic
+constraints and return types with local structural types, eliminating the
+TypeScript Language Server hang that some IDEs experienced on import.
+
+If you were casting the result of `makeResponseSuccessShape().item()` or
+`.list()` to `ZodObject`, replace it with the structural output type instead:
+
+```typescript
+// v0.3.2 — inferred as ZodObject<{...}>
+const schema = makeResponseSuccessShape(userSchema, 'user').item();
+
+// v0.3.3 — inferred as { readonly _zod: { readonly output: { user: ... } } }
+// runtime value is still a real ZodObject — call .parse() freely
+const schema = makeResponseSuccessShape(userSchema, 'user').item();
+schema.parse({ user: { id: '1', name: 'Alice' } }); // still works at runtime
+```
+
+See [`rules.md`](./rules.md) for the full set of constraints that govern
+Zod usage in exported signatures.
 
 ---
 

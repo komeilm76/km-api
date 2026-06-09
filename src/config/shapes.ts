@@ -1,5 +1,10 @@
-import { z, ZodArray, ZodObject, type ZodRawShape } from 'zod';
+import { z, ZodObject, type ZodRawShape } from 'zod';
 import type { IResponseSuccessData } from '../schemas';
+
+type $AnyZodObject = {
+  readonly _zod: { readonly output: Record<string, unknown> };
+  shape: Record<string, unknown>;
+};
 
 /**
  * Creates a response wrapper factory for single items or paginated lists.
@@ -26,7 +31,16 @@ import type { IResponseSuccessData } from '../schemas';
 const makeResponseSuccessShape = <RESPONSE extends IResponseSuccessData, KEY extends string>(
   response: RESPONSE,
   key: KEY = 'data' as KEY
-) => {
+): {
+  item: () => { readonly _zod: { readonly output: { [K in KEY]: RESPONSE['_zod']['output'] } } };
+  list: <AND extends $AnyZodObject>(
+    and: AND
+  ) => {
+    readonly _zod: {
+      readonly output: { [K in KEY]: Array<RESPONSE['_zod']['output']> } & AND['_zod']['output'];
+    };
+  };
+} => {
   return {
     /**
      * Wraps the schema in `{ [key]: schema }`.
@@ -37,7 +51,10 @@ const makeResponseSuccessShape = <RESPONSE extends IResponseSuccessData, KEY ext
      * // ZodObject<{ user: userSchema }>
      * ```
      */
-    item: () => z.object({ [key]: response }) as unknown as ZodObject<{ [K in KEY]: RESPONSE }>,
+    item: () =>
+      z.object({ [key]: response as unknown as z.ZodTypeAny }) as unknown as {
+        readonly _zod: { readonly output: { [K in KEY]: RESPONSE['_zod']['output'] } };
+      },
 
     /**
      * Wraps an array of the schema and merges additional fields (e.g. pagination).
@@ -50,11 +67,15 @@ const makeResponseSuccessShape = <RESPONSE extends IResponseSuccessData, KEY ext
      * // ZodObject<{ users: ZodArray<userSchema>, currentPage, totalItems, itemsPerPage }>
      * ```
      */
-    list: <AND extends ZodObject<ZodRawShape>>(and: AND) => {
-      const data = z.object({ [key]: z.array(response) }) as unknown as ZodObject<{
-        [K in KEY]: ZodArray<RESPONSE>;
-      }>;
-      return data.merge(and);
+    list: <AND extends $AnyZodObject>(and: AND) => {
+      const data = z.object({
+        [key]: z.array(response as unknown as z.ZodTypeAny),
+      }) as unknown as ZodObject<ZodRawShape>;
+      return data.merge(and as unknown as ZodObject<ZodRawShape>) as unknown as {
+        readonly _zod: {
+          readonly output: { [K in KEY]: Array<RESPONSE['_zod']['output']> } & AND['_zod']['output'];
+        };
+      };
     },
   };
 };
@@ -83,12 +104,32 @@ const makeResponseSuccessShape = <RESPONSE extends IResponseSuccessData, KEY ext
  * // }
  * ```
  */
-const paginationSchema = () =>
+const paginationSchema = (): {
+  readonly _zod: {
+    readonly output: {
+      currentPage: number;
+      totalItems: number;
+      itemsPerPage: number;
+      totalPages?: number;
+    };
+  };
+  shape: Record<string, unknown>;
+} =>
   z.object({
     currentPage: z.number().int().min(1),
     totalItems: z.number().int().min(0),
     itemsPerPage: z.number().int().min(1),
     totalPages: z.number().int().min(0).optional(),
-  });
+  }) as unknown as {
+    readonly _zod: {
+      readonly output: {
+        currentPage: number;
+        totalItems: number;
+        itemsPerPage: number;
+        totalPages?: number;
+      };
+    };
+    shape: Record<string, unknown>;
+  };
 
 export { makeResponseSuccessShape, paginationSchema };

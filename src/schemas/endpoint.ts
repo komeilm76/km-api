@@ -2,6 +2,15 @@ import z, { ZodObject, ZodType } from 'zod';
 import type { IAuthStatus, IDisableStatus, IHttpStatusCode, IMethod } from './http';
 import type { IRequestContentType, IResponseContentType } from './content-types';
 
+type $AnyZodType = {
+  readonly _zod: { readonly output: unknown };
+};
+
+type $AnyZodObject = {
+  readonly _zod: { readonly output: Record<string, unknown> };
+  shape: Record<string, unknown>;
+};
+
 // ==========================================
 // PATH AND DOCUMENTATION SCHEMAS
 // ==========================================
@@ -37,31 +46,31 @@ type IDescription = z.infer<typeof descriptionSchema>;
 
 /** Request body — any Zod schema. Maps to OpenAPI requestBody. */
 const bodySchema = z.instanceof(ZodType);
-type IBody = z.infer<typeof bodySchema>;
+type IBody = $AnyZodType;
 
 /** Path parameters — Zod object schema. Maps to OpenAPI `in: path` parameters. */
 const paramsSchema = z.instanceof(ZodObject);
-type IParams = z.infer<typeof paramsSchema>;
+type IParams = $AnyZodObject;
 
 /** Query parameters — Zod object schema. Maps to OpenAPI `in: query` parameters. */
 const querySchema = z.instanceof(ZodObject);
-type IQuery = z.infer<typeof querySchema>;
+type IQuery = $AnyZodObject;
 
 /** Custom headers — Zod object schema. Maps to OpenAPI `in: header` parameters. */
 const headersSchema = z.instanceof(ZodObject);
-type IHeaders = z.infer<typeof headersSchema>;
+type IHeaders = $AnyZodObject;
 
 /** Cookie parameters — Zod object schema. Maps to OpenAPI `in: cookie` parameters (3.0 only). */
 const cookiesSchema = z.instanceof(ZodObject);
-type ICookies = z.infer<typeof cookiesSchema>;
+type ICookies = $AnyZodObject;
 
 /** Success response schema — any Zod schema. Maps to 2xx OpenAPI response. */
 const responseSuccessSchema = z.instanceof(ZodType);
-type IResponseSuccessData = z.infer<typeof responseSuccessSchema>;
+type IResponseSuccessData = $AnyZodType;
 
 /** Error response schema — any Zod schema. Maps to 4xx/5xx OpenAPI response. */
 const responseErrorSchema = z.instanceof(ZodType);
-type IResponseErrorData = z.infer<typeof responseErrorSchema>;
+type IResponseErrorData = $AnyZodType;
 
 // ==========================================
 // OPENAPI EXAMPLE OBJECT

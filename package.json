@@ -77,7 +77,7 @@
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "publish-directly": "npm publish --access public",
-    "auto-release": "npm run fix:prettier && npm run build && npm test && release-it"
+    "ship": "release-it"
   },
   "devDependencies": {
     "@types/bun": "latest",

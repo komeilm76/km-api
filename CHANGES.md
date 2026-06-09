@@ -2,6 +2,92 @@
 
 ---
 
+## v0.3.3 — IDE-safe Zod types
+
+### What changed
+
+Replaced every Zod type that appeared in exported generic constraints and
+return types with local structural types. This eliminates the TypeScript
+Language Server hang that some IDEs experienced when importing km-api.
+
+#### `src/schemas/endpoint.ts`
+
+`IBody`, `IParams`, `IQuery`, `IHeaders`, `ICookies`, `IResponseSuccessData`,
+and `IResponseErrorData` were defined as `z.infer<typeof schema>` where the
+schemas used `z.instanceof(ZodType)` or `z.instanceof(ZodObject)`. TypeScript
+resolved these to `ZodType<unknown>` and `ZodObject<any>` respectively, then
+flowed them into all 16 generic parameters of `makeApiConfig` as top-level
+constraints. Each import forced a worst-case expansion of Zod's recursive
+conditional type system.
+
+All seven type aliases now use local structural types:
+
+```ts
+type IBody             = $AnyZodType;    // was z.infer<typeof bodySchema>
+type IParams           = $AnyZodObject;  // was z.infer<typeof paramsSchema>
+type IQuery            = $AnyZodObject;
+type IHeaders          = $AnyZodObject;
+type ICookies          = $AnyZodObject;
+type IResponseSuccessData = $AnyZodType;
+type IResponseErrorData   = $AnyZodType;
+```
+
+The schema values (`bodySchema`, `paramsSchema`, etc.) are unchanged.
+
+#### `src/config/shapes.ts`
+
+- `makeResponseSuccessShape().item()` return type changed from
+  `ZodObject<{ [K in KEY]: RESPONSE }>` to a structural type carrying
+  `{ readonly _zod: { readonly output: { [K in KEY]: RESPONSE['_zod']['output'] } } }`.
+- `makeResponseSuccessShape().list()` constraint changed from
+  `<AND extends ZodObject<ZodRawShape>>` to `<AND extends $AnyZodObject>`,
+  return type changed to the equivalent structural form.
+- `paginationSchema()` return type changed from the inferred `ZodObject<{...}>`
+  to an explicit structural type with concrete field types.
+
+All three functions still return real Zod objects at runtime — the structural
+annotations are type-level only.
+
+#### `src/config/factory.ts`
+
+The five helper methods (`makeBody`, `makeQueries`, `makeParams`, `makeHeaders`,
+`makeCookies`) and `makeFullPath` used `z.infer<CONFIG['request']['...']>` as
+their generic constraint. Replaced with `CONFIG['request']['...']['_zod']['output']`,
+which produces identical inference without a Zod dependency in the declaration.
+The `import { z } from 'zod'` line was removed from this file entirely.
+
+### Declaration file before / after
+
+```
+# before
+import z, { z as z$1, ZodObject, ZodRawShape } from 'zod';
+
+# after
+import z from 'zod';
+```
+
+The remaining `import z from 'zod'` comes exclusively from exported schema
+values (`methodSchema`, `bodySchema`, etc.) whose runtime type is a real Zod
+schema. Named Zod class imports that caused the hang are gone.
+
+### No breaking changes
+
+All exported function signatures remain fully compatible. Consumer code that
+calls `makeApiConfig`, `makeResponseSuccessShape`, `paginationSchema`, or any
+adapter function requires no changes.
+
+---
+
+## v0.3.2 — Tooling fixes
+
+- Prettier formatting applied to all source files.
+- Test runner migrated from Jest / ts-jest to Vitest.
+- Release script consolidated: `auto-release` replaced with `ship: "release-it"`;
+  pre-release steps (fix → build → test) moved into `.release-it.json`
+  `hooks.before:init`. Schema version in `.release-it.json` updated to `@19`.
+
+---
+
 ## v0.3.0 — Quality Rewrite
 
 ### Breaking changes
