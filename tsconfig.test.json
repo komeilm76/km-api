@@ -2,9 +2,6 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "rootDir": ".",
-    "module": "CommonJS",
-    "moduleResolution": "node",
-    "verbatimModuleSyntax": false,
     "noEmit": true,
     "emitDeclarationOnly": false
   },

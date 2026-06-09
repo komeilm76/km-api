@@ -43,8 +43,6 @@ bun-debug.log*
 # ------------------------------------------------------------
 /coverage/
 /.vitest/
-/jest-cache/
-/jest-coverage/
 
 # ------------------------------------------------------------
 # ⚙️ TEMPORARY & SYSTEM FILES
@@ -115,6 +113,8 @@ tmp/
 !src/
 !tsup.config.ts
 !tsconfig.json
+!tsconfig.test.json
+!vitest.config.ts
 !package.json
 !package.example.json
 !LICENSE

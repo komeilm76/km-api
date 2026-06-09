@@ -1,27 +1,23 @@
 import { defineConfig } from "tsup";
 
-/**
- * ------------------------------
- * 🏗️  TSUP Multi-format Build
- * ------------------------------
- * This config will build:
- *   ✅ CommonJS output (.cjs)
- *   ✅ ESM output (.mjs)
- *   ✅ Regular JS output (.js)
- *   ✅ Copy assets to ./dist/assets
- *
- * Run with: `tsup`
- */
+// ─────────────────────────────────────────────────────────────────────────────
+// CONFIGURE: set `platform` in each entry to match your package target
+//
+//   'neutral'  → universal (works in both Node and browser)   ← default
+//   'node'     → server-side only (can use Node built-ins)
+//   'browser'  → client-side only (no Node built-ins)
+//
+// Also set the matching environment in vitest.config.ts:
+//   'node'     → server / universal
+//   'jsdom'    → browser / client
+// ─────────────────────────────────────────────────────────────────────────────
 
 export default defineConfig([
-  // --------------------------
-  // 1️⃣ ESM (for Browser + Node)
-  // --------------------------
+  // ESM (Browser + Node)
   {
     entry: ["src/index.ts"],
     format: ["esm"],
     outExtension({ format }) {
-      // Write as .mjs file
       return { js: ".mjs" };
     },
     dts: true,
@@ -29,22 +25,15 @@ export default defineConfig([
     clean: true,
     outDir: "build/esm",
     target: "esnext",
-    platform: "neutral", // works in both browser + node
+    platform: "neutral", // CONFIGURE: 'neutral' | 'node' | 'browser'
     minify: true,
-    async onSuccess() {
-      // await fs.copy("src/assets", "dist/assets");
-      console.log("✅ Copied assets to dist/assets");
-    },
   },
 
-  // --------------------------
-  // 2️⃣ CommonJS (for Node)
-  // --------------------------
+  // CommonJS (Node)
   {
     entry: ["src/index.ts"],
     format: ["cjs"],
     outExtension({ format }) {
-      // Write as .cjs file
       return { js: ".cjs" };
     },
     dts: true,
@@ -56,14 +45,11 @@ export default defineConfig([
     minify: true,
   },
 
-  // --------------------------
-  // 3️⃣ Regular JS (universal .js)
-  // --------------------------
+  // Universal JS (.js)
   {
     entry: ["src/index.ts"],
     format: ["esm"],
     outExtension({ format }) {
-      // Keep as .js
       return { js: ".js" };
     },
     dts: true,
@@ -71,7 +57,7 @@ export default defineConfig([
     clean: false,
     outDir: "build/js",
     target: "es2020",
-    platform: "browser",
+    platform: "browser", // CONFIGURE: 'neutral' | 'node' | 'browser'
     minify: true,
   },
 ]);

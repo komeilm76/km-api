@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { convertRequestBody, needsConversion, safeConvertRequestBody } from '../../src/adapters/request';
 
 // ---- convertRequestBody ----------------------------------------------------

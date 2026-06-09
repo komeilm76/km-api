@@ -73,21 +73,20 @@
     "build:types": "tsc",
     "build:tsup": "bun run build:types && tsup",
     "build": "bun run build:types && bun run build:tsup",
-    "test": "jest",
-    "test:coverage": "jest --coverage",
-    "test:watch": "jest --watch",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest",
     "publish-directly": "npm publish --access public",
     "auto-release": "npm run fix:prettier && npm run build && npm test && release-it"
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "@types/jest": "^29.5.14",
-    "jest": "^29.7.0",
+    "@vitest/coverage-v8": "^2.0.0",
     "prettier": "^2.1.1",
     "release-it": "^19.2.2",
-    "ts-jest": "^29.4.11",
     "tsup": "^8.5.0",
     "typescript": "~5.9.2",
+    "vitest": "^2.0.0",
     "zod": "^4.3.6"
   },
   "peerDependencies": {

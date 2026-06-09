@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { responseContentTypeSchema, requestContentTypeSchema } from '../../src/schemas/content-types';
 
 describe('responseContentTypeSchema', () => {
