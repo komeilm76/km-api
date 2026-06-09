@@ -73,7 +73,9 @@ const makeResponseSuccessShape = <RESPONSE extends IResponseSuccessData, KEY ext
       }) as unknown as ZodObject<ZodRawShape>;
       return data.merge(and as unknown as ZodObject<ZodRawShape>) as unknown as {
         readonly _zod: {
-          readonly output: { [K in KEY]: Array<RESPONSE['_zod']['output']> } & AND['_zod']['output'];
+          readonly output: {
+            [K in KEY]: Array<RESPONSE['_zod']['output']>;
+          } & AND['_zod']['output'];
         };
       };
     },
