@@ -84,22 +84,20 @@ type AdapterType = 'axios' | 'alova-axios' | 'alova-uniapp' | 'alova-xhr' | 'alo
 type AdapterConfig<T extends AdapterType> = T extends 'axios' | 'alova-axios'
   ? AxiosAdapterConfig
   : T extends 'alova-uniapp'
-    ? UniAppAdapterConfig
-    : T extends 'alova-xhr'
-      ? XHRAdapterConfig
-      : T extends 'alova-taro'
-        ? TaroAdapterConfig
-        : T extends 'fetch'
-          ? FetchAdapterConfig
-          : never;
+  ? UniAppAdapterConfig
+  : T extends 'alova-xhr'
+  ? XHRAdapterConfig
+  : T extends 'alova-taro'
+  ? TaroAdapterConfig
+  : T extends 'fetch'
+  ? FetchAdapterConfig
+  : never;
 
 // ==========================================
 // INTERNAL HELPERS
 // ==========================================
 
-function contentTypeCategory(
-  contentType: string
-): 'json' | 'binary' | 'text' | 'xml' | 'formdata' {
+function contentTypeCategory(contentType: string): 'json' | 'binary' | 'text' | 'xml' | 'formdata' {
   if (
     contentType === 'application/json' ||
     contentType === 'application/ld+json' ||

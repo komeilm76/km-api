@@ -258,7 +258,9 @@ function needsConversion(data: unknown, contentType: IRequestContentType): boole
  * ```
  */
 function safeConvertRequestBody(data: unknown, contentType: IRequestContentType): AlovaRequestBody {
-  return needsConversion(data, contentType) ? convertRequestBody(data, contentType) : (data as AlovaRequestBody);
+  return needsConversion(data, contentType)
+    ? convertRequestBody(data, contentType)
+    : (data as AlovaRequestBody);
 }
 
 export type { AlovaRequestBody };

@@ -23,10 +23,7 @@ import type { IResponseSuccessData } from '../schemas';
  * const listSchema = userShape.list(paginationSchema());
  * ```
  */
-const makeResponseSuccessShape = <
-  RESPONSE extends IResponseSuccessData,
-  KEY extends string,
->(
+const makeResponseSuccessShape = <RESPONSE extends IResponseSuccessData, KEY extends string>(
   response: RESPONSE,
   key: KEY = 'data' as KEY
 ) => {
@@ -40,8 +37,7 @@ const makeResponseSuccessShape = <
      * // ZodObject<{ user: userSchema }>
      * ```
      */
-    item: () =>
-      z.object({ [key]: response }) as unknown as ZodObject<{ [K in KEY]: RESPONSE }>,
+    item: () => z.object({ [key]: response }) as unknown as ZodObject<{ [K in KEY]: RESPONSE }>,
 
     /**
      * Wraps an array of the schema and merges additional fields (e.g. pagination).

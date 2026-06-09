@@ -105,7 +105,7 @@ const makeApiConfig = <
     COOKIES,
     RESPONSE_SUCCESS,
     RESPONSE_ERROR
-  >,
+  >
 >(
   entryConfig: CONFIG
 ) => {

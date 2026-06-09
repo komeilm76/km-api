@@ -180,7 +180,7 @@ type IMakeApiConfigEntry<
   HEADERS extends IHeaders = IHeaders,
   COOKIES extends ICookies = ICookies,
   RESPONSE_SUCCESS extends IResponseSuccessData = IResponseSuccessData,
-  RESPONSE_ERROR extends IResponseErrorData = IResponseErrorData,
+  RESPONSE_ERROR extends IResponseErrorData = IResponseErrorData
 > = {
   /** HTTP method. Case-insensitive (GET, get, Get). */
   method: METHOD;
